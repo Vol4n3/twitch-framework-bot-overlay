@@ -1,0 +1,21 @@
+{
+  "name": "bot-twitch-overlay",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.5",
+    "vite": "^4.1.1"
+  },
+  "dependencies": {
+    "jcv-ts-utils": "^1.0.4",
+    "prettier": "^2.8.3",
+    "sass": "^1.58.0",
+    "socket.io-client": "^4.5.4"
+  }
+}
