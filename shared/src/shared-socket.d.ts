@@ -1,10 +1,11 @@
-import { GameData } from "./shared-game";
+import { GameData, PlayerWithHeroStats } from "./shared-game";
+
 export interface ServerToClientEvents {
-    gameState: (data: GameData) => void;
+  gameState: (data: GameData<PlayerWithHeroStats>) => void;
 }
-export interface ClientToServerEvents {
-}
-export interface InterServerEvents {
-}
-export interface SocketData {
-}
+
+export interface ClientToServerEvents {}
+
+export interface InterServerEvents {}
+
+export interface SocketData {}

@@ -5,7 +5,8 @@ import {
   ServerToClientEvents,
 } from "../../shared/src/shared-socket";
 import { Player } from "../../shared/src/shared-game";
-import { Item2Scene, Point2, Scene2d } from "jcv-ts-utils";
+import { Item2Scene, Point, Scene2d } from "jcv-ts-utils";
+import Point2 = Point.Point2;
 const SERVER_PORT = 8085;
 const SERVER_ADDRESS = `http://localhost:${SERVER_PORT}`;
 
@@ -13,12 +14,15 @@ class Hero implements Item2Scene {
   isUpdated: boolean = true;
   scenePriority: number = 0;
 
-  constructor(public player: Player, public position: Point2 = [0, 0]) {}
+  constructor(
+    public player: Player,
+    public position: Point2 = { x: 0, y: 0 }
+  ) {}
 
   // @ts-ignore
   draw2d(scene: Scene2d): void {
     const { ctx } = scene;
-    const [x, y] = this.position;
+    const { x, y } = this.position;
     ctx.translate(x, y);
     ctx.beginPath();
     ctx.rect(0, 0, 100, 100);
@@ -69,7 +73,7 @@ const init = async () => {
         (f) => !players.some((s) => s.id === f.id)
       );
       newPlayers.forEach((newPlayer) => {
-        const hero = new Hero(newPlayer, [0, 0]);
+        const hero = new Hero(newPlayer);
         scene.addItem(hero);
       });
       players = data.players;

@@ -11,9 +11,10 @@ import { HighLightTTS } from "./messages/highlight-tts/highlight-tts";
 import { Game } from "./game/game";
 import { JoinGame } from "./messages/join-game/join-game";
 import { TTSCommand } from "./commands/tts";
+import { HeroStat } from "./commands/hero-stat";
 
 export const messageListeners: MessageListener[] = [HighLightTTS, JoinGame];
-export const commandListeners: CommandListener[] = [TTSCommand];
+export const commandListeners: CommandListener[] = [TTSCommand, HeroStat];
 export const rewardListeners: RewardListener[] = [];
 
 export type ClientSocket = Socket<
@@ -23,6 +24,7 @@ export type ClientSocket = Socket<
   SocketData
 >;
 export type MessageListener = (data: {
+  channel: string;
   user: string;
   rawText: string;
   meta: PrivateMessage;
@@ -35,6 +37,7 @@ export type MessageListener = (data: {
 }) => void;
 
 export type CommandListener = (data: {
+  channel: string;
   user: string;
   command: string;
   userId: string;
@@ -47,6 +50,7 @@ export type CommandListener = (data: {
 }) => void;
 
 export type RewardListener = (data: {
+  channel: string;
   title: string;
   user: string;
   userId: string;

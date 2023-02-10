@@ -1,4 +1,4 @@
-export interface PlayerPoints {
+export interface HeroStats {
   pv: number;
   power: number;
   speed: number;
@@ -8,8 +8,12 @@ export interface PlayerPoints {
 export interface Player {
   id: string;
   name: string;
-  points: PlayerPoints;
+  points: HeroStats;
 }
-export interface GameData {
-  players: Player[];
+export interface PlayerWithHeroStats extends Player {
+  heroStats: HeroStats;
+  level: number;
+}
+export interface GameData<P extends Player> {
+  players: P[];
 }

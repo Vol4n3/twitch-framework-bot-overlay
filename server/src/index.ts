@@ -1,4 +1,4 @@
-import { config } from "dotenv";
+import { config as DotEnvConfig } from "dotenv";
 import { Server } from "socket.io";
 import { AccessToken, RefreshingAuthProvider } from "@twurple/auth";
 import { ChatClient, PrivateMessage } from "@twurple/chat";
@@ -22,11 +22,9 @@ import { createServer } from "http";
 import { Game } from "./game/game";
 import open from "open";
 import fetch from "node-fetch";
-export const SERVER_PORT = 8085;
-export const SERVER_ADDRESS = `http://localhost:${SERVER_PORT}`;
+import { SERVER_ADDRESS, SERVER_PORT, STORAGE_FOLDER } from "./configs";
 
-config();
-const STORAGE_FOLDER = "storage";
+DotEnvConfig();
 
 const {
   TWITCH_SECRET = "config it in .env",
@@ -215,6 +213,7 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
   pubSubClient.onRedemption(BROADCASTER_ID, (message) => {
     rewardListeners.forEach((cb) => {
       cb({
+        channel: BROADCASTER_ID,
         user: message.userName,
         title: message.rewardTitle,
         userId: message.userId,
@@ -235,12 +234,15 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
         .map((p) => (p.type === "text" ? p.text : ""));
       const parsedText = extractEmotes.join(" ");
       const [first, ...args] = parsedText.split(" ");
-      const command = first.startsWith("!") ? first.replace("!", "") : "";
+      const command = first.startsWith("!")
+        ? first.replace("!", "").toLowerCase()
+        : "";
 
       commandListeners.forEach((cb) => {
         if (!command) return;
 
         cb({
+          channel,
           user,
           command,
           meta,
@@ -254,6 +256,7 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
       });
       messageListeners.forEach((cb) => {
         cb({
+          channel,
           user,
           rawText: text,
           meta,
