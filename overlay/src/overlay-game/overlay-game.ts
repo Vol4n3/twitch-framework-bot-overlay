@@ -1,12 +1,13 @@
-import "./style.scss";
+import "../style.scss";
 import { io, Socket } from "socket.io-client";
 import {
   ClientToServerEvents,
   ServerToClientEvents,
-} from "../../shared/src/shared-socket";
-import { Player } from "../../shared/src/shared-game";
-import { Item2Scene, Point, Scene2d } from "jcv-ts-utils";
+} from "../../../shared/src/shared-socket";
+import { Player } from "../../../shared/src/shared-game";
+import { Easing, Item2Scene, Point, Scene2d } from "jcv-ts-utils";
 import Point2 = Point.Point2;
+
 const SERVER_PORT = 8085;
 const SERVER_ADDRESS = `http://localhost:${SERVER_PORT}`;
 
@@ -43,7 +44,7 @@ class Hero implements Item2Scene {
   destroy(): void {}
 }
 
-const init = async () => {
+const init = () => {
   const container = document.getElementById("scene");
   if (!container) return;
   const scene = new Scene2d(container);
@@ -72,6 +73,22 @@ const init = async () => {
       const newPlayers = data.players.filter(
         (f) => !players.some((s) => s.id === f.id)
       );
+      if (newPlayers.length) {
+        scene.addEasing({
+          easing: Easing.easeShake(5),
+          scale: 3,
+          onNext: (n: number) => (scene.camera.y = n),
+          start: scene.camera.y,
+          time: 10,
+        });
+        scene.addEasing({
+          easing: Easing.easeShake(5),
+          scale: 2,
+          onNext: (n: number) => (scene.camera.x = n),
+          start: scene.camera.x,
+          time: 10,
+        });
+      }
       newPlayers.forEach((newPlayer) => {
         const hero = new Hero(newPlayer);
         scene.addItem(hero);
@@ -80,6 +97,4 @@ const init = async () => {
     });
   });
 };
-init()
-  .then(() => {})
-  .catch(() => {});
+init();

@@ -22,7 +22,13 @@ import { createServer } from "http";
 import { Game } from "./game/game";
 import open from "open";
 import fetch from "node-fetch";
-import { SERVER_ADDRESS, SERVER_PORT, STORAGE_FOLDER } from "./configs";
+import {
+  SERVER_ADDRESS,
+  SERVER_PORT,
+  SOUNDS_PATH,
+  STORAGE_FOLDER,
+} from "./configs";
+import { initSounds } from "./commands/sound";
 
 DotEnvConfig();
 
@@ -33,9 +39,16 @@ const {
   BROADCASTER_ID = "config it in .env",
 } = process.env;
 
+fs.mkdir(`./${STORAGE_FOLDER}`).catch(() => {});
+fs.mkdir(SOUNDS_PATH).catch(() => {});
+initSounds().catch((reason) => {
+  console.log(reason);
+});
+
 const today = new Date();
 const yesterday = new Date(today);
 yesterday.setDate(yesterday.getDate() - 1);
+
 let _twitchCode: string;
 const getTwitchCode = () =>
   new Promise<string>((resolve) => {
@@ -96,12 +109,6 @@ async function connection(): Promise<{
   apiClient: ApiClient;
   pubSubClient: PubSubClient;
 }> {
-  try {
-    await fs.mkdir(`./${STORAGE_FOLDER}`);
-    console.log("create storage folder");
-  } catch (e) {
-    console.log("storage folder already exist");
-  }
   let token: AccessToken;
   try {
     token = await getToken();

@@ -33,11 +33,20 @@ const pointToStat = ({
   dodge,
 }: HeroStats): HeroStats => {
   return {
-    critic: scaleHyperTangent(critic, 100, 0.5, 0.05),
-    dodge: scaleHyperTangent(dodge, 100, 0.5, 0.05),
-    power: 2 + power,
-    pv: 10 + pv * 2,
-    speed: scaleHyperTangent(speed, 100, 0.5, 0.05),
+    critic: NumberUtils.round(
+      scaleHyperTangent(critic, 100, 0.5, 0.05) * 100,
+      100
+    ),
+    dodge: NumberUtils.round(
+      scaleHyperTangent(dodge, 100, 0.5, 0.05) * 100,
+      100
+    ),
+    power: NumberUtils.round(scaleHyperTangent(power, 100, 50, 2), 1),
+    pv: NumberUtils.round(scaleHyperTangent(pv, 100, 200, 10), 1),
+    speed: NumberUtils.round(
+      scaleHyperTangent(speed, 100, 0.5, 0.05) * 100,
+      100
+    ),
   };
 };
 
@@ -75,7 +84,7 @@ export class Game {
   }
 
   saveGame() {
-    saveData(this.state)
+    saveData({ players: this.players })
       .then(() => {
         console.log("success save data");
       })

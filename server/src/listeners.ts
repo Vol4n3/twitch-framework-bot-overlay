@@ -12,9 +12,14 @@ import { Game } from "./game/game";
 import { JoinGame } from "./messages/join-game/join-game";
 import { TTSCommand } from "./commands/tts";
 import { HeroStat } from "./commands/hero-stat";
+import { SoundListener } from "./commands/sound";
 
 export const messageListeners: MessageListener[] = [HighLightTTS, JoinGame];
-export const commandListeners: CommandListener[] = [TTSCommand, HeroStat];
+export const commandListeners: CommandListener[] = [
+  TTSCommand,
+  HeroStat,
+  SoundListener,
+];
 export const rewardListeners: RewardListener[] = [];
 
 export type ClientSocket = Socket<

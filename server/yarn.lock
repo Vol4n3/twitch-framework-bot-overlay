@@ -827,10 +827,10 @@ iterate-value@^1.0.2:
     es-get-iterator "^1.0.2"
     iterate-iterator "^1.0.1"
 
-jcv-ts-utils@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/jcv-ts-utils/-/jcv-ts-utils-1.1.0.tgz#e5cb7c2a4d1e018a73128e7dd77c657dd2d1115d"
-  integrity sha512-hgaw2F68y2Lum7yf0J84GGnNFT/SBA9W8Tm+Yz5PWnhWBzN2AUf9G0czbMDDf/r2cV4me3GmXk6MHfVCPPBpJg==
+jcv-ts-utils@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/jcv-ts-utils/-/jcv-ts-utils-1.1.3.tgz#d6035c80b5a2aaaf8f633ea6303418f0cb4dbf94"
+  integrity sha512-ur4vEx6wTqqWdAHAvRbl3hkhGLq//7fuXSFNTtZBcuQ+GIIOvSEXJmf4wViXkqOUsFBmKJ8/fwkoitUBY3mIwQ==
 
 json-parse-better-errors@^1.0.1:
   version "1.0.2"

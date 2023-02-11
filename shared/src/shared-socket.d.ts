@@ -1,7 +1,11 @@
 import { GameData, PlayerWithHeroStats } from "./shared-game";
-
+type soundOption = {
+  fileName: string;
+  times: number;
+};
 export interface ServerToClientEvents {
   gameState: (data: GameData<PlayerWithHeroStats>) => void;
+  playSound: (data: soundOption) => void;
 }
 
 export interface ClientToServerEvents {}

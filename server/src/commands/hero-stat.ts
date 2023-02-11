@@ -20,9 +20,9 @@ export const HeroStat: CommandListener = ({
       `@${name}: lvl(${player.level})
       ❤️‍🔥${player.heroStats.pv}❤️‍🔥
       ⚔️${player.heroStats.power}⚔️
-      ✨${NumberUtils.round(player.heroStats.critic * 100, 100)}%✨
-      ⚡${NumberUtils.round(player.heroStats.speed * 100, 100)}%⚡
-      😶‍🌫️${NumberUtils.round(player.heroStats.dodge * 100, 100)}%😶‍🌫️
+      ✨${player.heroStats.critic}%✨
+      ⚡${player.heroStats.speed}%⚡
+      😶‍🌫️${player.heroStats.dodge}%😶‍🌫️
 `
     );
   }
