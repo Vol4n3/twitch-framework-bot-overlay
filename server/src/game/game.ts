@@ -33,29 +33,22 @@ const pointToStat = ({
   dodge,
 }: HeroStats): HeroStats => {
   return {
-    critic: NumberUtils.round(
-      scaleHyperTangent(critic, 100, 0.5, 0.05) * 100,
-      100
-    ),
-    dodge: NumberUtils.round(
-      scaleHyperTangent(dodge, 100, 0.5, 0.05) * 100,
-      100
-    ),
+    critic: NumberUtils.round(scaleHyperTangent(critic, 100, 50, 5), 100),
+    dodge: NumberUtils.round(scaleHyperTangent(dodge, 100, 50, 5), 100),
     power: NumberUtils.round(scaleHyperTangent(power, 100, 50, 2), 1),
     pv: NumberUtils.round(scaleHyperTangent(pv, 100, 200, 10), 1),
-    speed: NumberUtils.round(
-      scaleHyperTangent(speed, 100, 0.5, 0.05) * 100,
-      100
-    ),
+    speed: NumberUtils.round(scaleHyperTangent(speed, 100, 50, 5), 100),
   };
 };
 
 function calcLvl(points: HeroStats): number {
-  return Math.ceil(
-    (Object.keys(points) as (keyof HeroStats)[]).reduce(
-      (prev, curr) => prev + points[curr],
-      0
-    ) / 10
+  return (
+    Math.ceil(
+      (Object.keys(points) as (keyof HeroStats)[]).reduce(
+        (prev, curr) => prev + points[curr],
+        0
+      ) / 10
+    ) + 1
   );
 }
 

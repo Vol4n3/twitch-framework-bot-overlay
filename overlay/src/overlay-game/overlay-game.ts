@@ -4,56 +4,21 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "../../../shared/src/shared-socket";
-import { Player } from "../../../shared/src/shared-game";
-import { Easing, Item2Scene, Point, Scene2d } from "jcv-ts-utils";
-import Point2 = Point.Point2;
-
-const SERVER_PORT = 8085;
-const SERVER_ADDRESS = `http://localhost:${SERVER_PORT}`;
-
-class Hero implements Item2Scene {
-  isUpdated: boolean = true;
-  scenePriority: number = 0;
-
-  constructor(
-    public player: Player,
-    public position: Point2 = { x: 0, y: 0 }
-  ) {}
-
-  // @ts-ignore
-  draw2d(scene: Scene2d): void {
-    const { ctx } = scene;
-    const { x, y } = this.position;
-    ctx.translate(x, y);
-    ctx.beginPath();
-    ctx.rect(0, 0, 100, 100);
-    ctx.closePath();
-    ctx.fill();
-    scene.writeText({
-      x,
-      y,
-      text: this.player.name,
-      fillStyle: "red",
-    });
-  }
-
-  onResize(): void {}
-
-  update(): void {}
-
-  destroy(): void {}
-}
-
+import { Scene2d } from "jcv-ts-utils";
+import { Hero } from "./objects/hero";
+const { VITE_SERVER_ADDRESS, VITE_BROADCAST_ID } = import.meta.env;
 const init = () => {
   const container = document.getElementById("scene");
   if (!container) return;
   const scene = new Scene2d(container);
 
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
-    io(SERVER_ADDRESS);
-  let players: Player[] = [];
+    io(VITE_SERVER_ADDRESS);
+  const heroes: Hero[] = [];
   const connectionToHeat = () => {
-    let heat = new WebSocket(`wss://heat-api.j38.net/channel/58271362`);
+    let heat = new WebSocket(
+      `wss://heat-api.j38.net/channel/${VITE_BROADCAST_ID}`
+    );
     const onMessage = (data: any) => {
       console.log("heat", data);
     };
@@ -61,7 +26,7 @@ const init = () => {
     heat.addEventListener(
       "close",
       () => {
-        setTimeout(connectionToHeat, 1000);
+        setTimeout(connectionToHeat, 10000);
         heat.removeEventListener("message", onMessage);
       },
       { once: true }
@@ -71,29 +36,19 @@ const init = () => {
   socket.on("connect", () => {
     socket.on("gameState", async (data) => {
       const newPlayers = data.players.filter(
-        (f) => !players.some((s) => s.id === f.id)
+        (f) => !heroes.some((s) => s.player.id === f.id)
       );
-      if (newPlayers.length) {
-        scene.addEasing({
-          easing: Easing.easeShake(5),
-          scale: 3,
-          onNext: (n: number) => (scene.camera.y = n),
-          start: scene.camera.y,
-          time: 10,
-        });
-        scene.addEasing({
-          easing: Easing.easeShake(5),
-          scale: 2,
-          onNext: (n: number) => (scene.camera.x = n),
-          start: scene.camera.x,
-          time: 10,
-        });
-      }
-      newPlayers.forEach((newPlayer) => {
-        const hero = new Hero(newPlayer);
-        scene.addItem(hero);
-      });
-      players = data.players;
+
+      heroes.push(
+        ...newPlayers.map((newPlayer) => {
+          const hero = new Hero(newPlayer, {
+            x: (Math.random() * scene.width) / 2,
+            y: 0,
+          });
+          scene.addItem(hero);
+          return hero;
+        })
+      );
     });
   });
 };

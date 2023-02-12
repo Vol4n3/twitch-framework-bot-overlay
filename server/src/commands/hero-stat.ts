@@ -1,6 +1,5 @@
 import { CommandListener } from "../listeners";
 import { PlayerWithHeroStats } from "../../../shared/src/shared-game";
-import { NumberUtils } from "jcv-ts-utils";
 
 export const HeroStat: CommandListener = ({
   channel,
@@ -18,11 +17,11 @@ export const HeroStat: CommandListener = ({
     chatClient.say(
       channel,
       `@${name}: lvl(${player.level})
-      ❤️‍🔥${player.heroStats.pv}❤️‍🔥
-      ⚔️${player.heroStats.power}⚔️
-      ✨${player.heroStats.critic}%✨
-      ⚡${player.heroStats.speed}%⚡
-      😶‍🌫️${player.heroStats.dodge}%😶‍🌫️
+      ${player.heroStats.pv}❤️‍🔥
+      ${player.heroStats.power}⚔️
+      ${player.heroStats.critic}%✨
+      ${player.heroStats.speed}%⚡
+      ${player.heroStats.dodge}%😶‍🌫️
 `
     );
   }

@@ -241,10 +241,10 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
         .map((p) => (p.type === "text" ? p.text : ""));
       const parsedText = extractEmotes.join(" ");
       const [first, ...args] = parsedText.split(" ");
-      const command = first.startsWith("!")
+      let command = first.startsWith("!")
         ? first.replace("!", "").toLowerCase()
         : "";
-
+      command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       commandListeners.forEach((cb) => {
         if (!command) return;
 

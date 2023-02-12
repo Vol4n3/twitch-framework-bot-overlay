@@ -24,16 +24,28 @@ export const SoundListener: CommandListener = async ({
   args,
   clientSockets,
 }) => {
+  if (command === "sound") {
+    const fileNames: string[] = args
+      .slice(0, 5)
+      .map((arg) => sounds.find((s) => s.id === arg)?.fileName)
+      .filter((f) => !!f) as string[];
+    clientSockets.forEach((socket) => {
+      socket.emit("playMultipleSound", fileNames);
+    });
+    return;
+  }
   sounds.forEach(({ fileName, id }) => {
     if (id !== command.toLowerCase()) {
       return;
     }
-    const times = parseInt(args[0]);
-    clientSockets.forEach((socket) =>
+    let times = parseInt(args[0]);
+    times = isNaN(times) ? 1 : times;
+    times = times > 5 ? 5 : times;
+    clientSockets.forEach((socket) => {
       socket.emit("playSound", {
         fileName,
-        times: isNaN(times) ? 1 : times,
-      })
-    );
+        times,
+      });
+    });
   });
 };
