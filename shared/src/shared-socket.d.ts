@@ -7,6 +7,8 @@ export interface ServerToClientEvents {
   gameState: (data: GameData<PlayerWithHeroStats>) => void;
   playSound: (data: soundOption) => void;
   playMultipleSound: (data: string[]) => void;
+
+  chatMessage: (data: { message: string; user: string }) => void;
 }
 
 export interface ClientToServerEvents {}

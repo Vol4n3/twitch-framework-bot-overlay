@@ -9,12 +9,12 @@ import {
 } from "../../shared/src/shared-socket";
 import { HighLightTTS } from "./messages/highlight-tts/highlight-tts";
 import { Game } from "./game/game";
-import { JoinGame } from "./messages/join-game/join-game";
+import { ChatMessage } from "./messages/chat-message/chat-message";
 import { TTSCommand } from "./commands/tts";
 import { HeroStat } from "./commands/hero-stat";
 import { SoundListener } from "./commands/sound";
 
-export const messageListeners: MessageListener[] = [HighLightTTS, JoinGame];
+export const messageListeners: MessageListener[] = [HighLightTTS, ChatMessage];
 export const commandListeners: CommandListener[] = [
   TTSCommand,
   HeroStat,

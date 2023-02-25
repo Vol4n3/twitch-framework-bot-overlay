@@ -4,23 +4,23 @@
   "main": "dist/index.js",
   "license": "MIT",
   "scripts": {
-    "server": "node ./dist/index.js",
+    "server": "tsc && node ./dist/index.js",
     "watch": "tsc --watch"
   },
 
   "devDependencies": {
-    "node-fetch": "^2.6.9",
-    "@twurple/api": "^6.0.0-pre.6",
-    "@twurple/auth": "^6.0.0-pre.6",
-    "@twurple/chat": "^6.0.0-pre.6",
-    "@twurple/eventsub-ws": "^6.0.0-pre.6",
-    "@twurple/pubsub": "^6.0.0-pre.6",
+    "node-fetch": "2.6.9",
+    "@twurple/api": "^6.0.4",
+    "@twurple/auth": "^6.0.4",
+    "@twurple/chat": "^6.0.4",
+    "@twurple/eventsub-ws": "^6.0.4",
+    "@twurple/pubsub": "^6.0.4",
     "@types/node": "^16.18.12",
     "dotenv": "^16.0.3",
     "npm-run-all": "^4.1.5",
-    "open": "^8.4.1",
-    "socket.io": "^4.6.0",
+    "open": "^8.4.2",
+    "socket.io": "^4.6.1",
     "typescript": "^4.9.5",
-    "jcv-ts-utils": "^1.1.5"
+    "jcv-ts-utils": "^1.1.6"
   }
 }

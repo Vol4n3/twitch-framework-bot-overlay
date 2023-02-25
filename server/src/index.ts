@@ -1,4 +1,3 @@
-import { config as DotEnvConfig } from "dotenv";
 import { Server } from "socket.io";
 import { AccessToken, RefreshingAuthProvider } from "@twurple/auth";
 import { ChatClient, PrivateMessage } from "@twurple/chat";
@@ -20,24 +19,19 @@ import {
 import { EventSubWsListener } from "@twurple/eventsub-ws";
 import { createServer } from "http";
 import { Game } from "./game/game";
-import open from "open";
+const open = require("open");
 import fetch from "node-fetch";
 import {
+  BROADCASTER_ID,
   SERVER_ADDRESS,
   SERVER_PORT,
   SOUNDS_PATH,
   STORAGE_FOLDER,
+  TWITCH_BOT_ID,
+  TWITCH_CLIENT,
+  TWITCH_SECRET,
 } from "./configs";
 import { initSounds } from "./commands/sound";
-
-DotEnvConfig();
-
-const {
-  TWITCH_SECRET = "config it in .env",
-  TWITCH_CLIENT = "config it in .env",
-  TWITCH_BOT_ID = "config it in .env",
-  BROADCASTER_ID = "config it in .env",
-} = process.env;
 
 fs.mkdir(`./${STORAGE_FOLDER}`).catch(() => {});
 fs.mkdir(SOUNDS_PATH).catch(() => {});
@@ -157,6 +151,7 @@ async function connection(): Promise<{
       refreshToken: responseToken.refresh_token,
       obtainmentTimestamp: new Date().getDate(),
     };
+    await saveToken(token);
   }
   const authProvider = await refresh();
   console.log("auth SuccessFull");
@@ -198,15 +193,11 @@ const clearReward = async ({ apiClient }: { apiClient: ApiClient }) => {
     );
   }
 };
+const usersBlacklist = ["moobot"].map((m) => m.toLowerCase());
 connection().then(({ pubSubClient, chatClient, apiClient }) => {
   console.log("connected to twitch");
   const gameInstance = new Game();
 
-  clearReward({ apiClient })
-    .then(() => {
-      // comment this if you d'ont want clean redemptions after 24h
-    })
-    .catch((reason) => console.error(reason));
   let clientSockets: ClientSocket[] = [];
   ioServer.on("connection", (socket) => {
     clientSockets.push(socket);
@@ -236,6 +227,7 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
       text: string,
       meta: PrivateMessage
     ) => {
+      if (usersBlacklist.includes(user.toLowerCase())) return;
       const extractEmotes = meta
         .parseEmotes()
         .map((p) => (p.type === "text" ? p.text : ""));

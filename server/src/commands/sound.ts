@@ -14,7 +14,7 @@ export async function initSounds() {
   const files = await fs.readdir(SOUNDS_PATH);
   console.log("audio found files", files.length);
   sounds = files.map((fileName, i) => ({
-    id: fileName.split("-").at(0) || i.toString(),
+    id: fileName.split(".").at(0)?.trim().toLowerCase() || i.toString(),
     fileName,
   }));
 }
