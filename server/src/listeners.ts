@@ -7,20 +7,20 @@ import {
   ServerToClientEvents,
   SocketData,
 } from "../../shared/src/shared-socket";
-import { HighLightTTS } from "./messages/highlight-tts/highlight-tts";
-import { Game } from "./game/game";
-import { ChatMessage } from "./messages/chat-message/chat-message";
-import { TTSCommand } from "./commands/tts";
+import { HeroGame } from "./game/hero-game";
+import { ChatMessage } from "./commands/chat-message";
 import { HeroStat } from "./commands/hero-stat";
 import { SoundListener } from "./commands/sound";
+import { TTSCommand } from "./commands/highlight-tts/tts-command";
+import { HeroReward } from "./rewards/heroes/hero-reward";
 
-export const messageListeners: MessageListener[] = [HighLightTTS, ChatMessage];
 export const commandListeners: CommandListener[] = [
   TTSCommand,
   HeroStat,
   SoundListener,
+  ChatMessage,
 ];
-export const rewardListeners: RewardListener[] = [];
+export const rewardListeners: RewardListener[] = [HeroReward];
 
 export type ClientSocket = Socket<
   ClientToServerEvents,
@@ -28,21 +28,11 @@ export type ClientSocket = Socket<
   InterServerEvents,
   SocketData
 >;
-export type MessageListener = (data: {
-  channel: string;
-  user: string;
-  rawText: string;
-  meta: PrivateMessage;
-  userId: string;
-  parsedText: string;
-  chatClient: ChatClient;
-  apiClient: ApiClient;
-  clientSockets: ClientSocket[];
-  gameInstance: Game;
-}) => void;
 
 export type CommandListener = (data: {
   channel: string;
+  rawText: string;
+  parsedText: string;
   user: string;
   command: string;
   userId: string;
@@ -51,14 +41,17 @@ export type CommandListener = (data: {
   chatClient: ChatClient;
   apiClient: ApiClient;
   clientSockets: ClientSocket[];
-  gameInstance: Game;
+  gameInstance: HeroGame;
 }) => void;
 
 export type RewardListener = (data: {
   channel: string;
-  title: string;
+  rewardTitle: string;
   user: string;
   userId: string;
   message: string | undefined;
-  gameInstance: Game;
+  gameInstance: HeroGame;
+  chatClient: ChatClient;
+  apiClient: ApiClient;
+  clientSockets: ClientSocket[];
 }) => void;

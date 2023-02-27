@@ -1,12 +1,13 @@
 import { promises as fs } from "fs";
 import {
   GameData,
-  Player,
   HeroStats,
+  Player,
   PlayerWithHeroStats,
 } from "../../../shared/src/shared-game";
 import { NumberUtils } from "jcv-ts-utils";
 import { STORAGE_FOLDER } from "../configs";
+
 const dataPath = `./${STORAGE_FOLDER}/game.json`;
 const { scaleHyperTangent } = NumberUtils;
 
@@ -24,6 +25,7 @@ const defaultPoints: HeroStats = {
   speed: 0,
   dodge: 0,
   critic: 0,
+  regen: 0,
 };
 const pointToStat = ({
   critic,
@@ -31,13 +33,15 @@ const pointToStat = ({
   pv,
   power,
   dodge,
+  regen,
 }: HeroStats): HeroStats => {
   return {
-    critic: NumberUtils.round(scaleHyperTangent(critic, 100, 50, 5), 100),
-    dodge: NumberUtils.round(scaleHyperTangent(dodge, 100, 50, 5), 100),
-    power: NumberUtils.round(scaleHyperTangent(power, 100, 50, 2), 1),
-    pv: NumberUtils.round(scaleHyperTangent(pv, 100, 200, 10), 1),
-    speed: NumberUtils.round(scaleHyperTangent(speed, 100, 50, 5), 100),
+    critic: NumberUtils.round(scaleHyperTangent(critic, 200, 50, 5), 100),
+    dodge: NumberUtils.round(scaleHyperTangent(dodge, 200, 50, 5), 100),
+    power: NumberUtils.round(scaleHyperTangent(power, 200, 60, 2), 1),
+    pv: NumberUtils.round(scaleHyperTangent(pv, 200, 200, 10), 1),
+    regen: NumberUtils.round(scaleHyperTangent(regen, 200, 30, 1), 1),
+    speed: NumberUtils.round(scaleHyperTangent(speed, 200, 100, 0), 1),
   };
 };
 
@@ -52,7 +56,7 @@ function calcLvl(points: HeroStats): number {
   );
 }
 
-export class Game {
+export class HeroGame {
   players: Player[] = [];
   private storedPlayers: Player[] = [];
 
@@ -76,15 +80,38 @@ export class Game {
     };
   }
 
-  saveGame() {
-    saveData({ players: this.players })
-      .then(() => {
-        console.log("success save data");
-      })
-      .catch(() => {});
+  async addPoint(playerName: string, which: keyof HeroStats, amount: number) {
+    this.players = this.players.map((player) => {
+      if (player.name !== playerName) return player;
+      return {
+        ...player,
+        points: { ...player.points, [which]: player.points[which] + amount },
+      };
+    });
+    return this.saveGame();
+  }
+  getPlayerState(playerName: string): PlayerWithHeroStats | undefined {
+    return this.state.players.find((p) => p.name === playerName);
+  }
+  playerStateToString(playerName: string): string {
+    const player: PlayerWithHeroStats | undefined =
+      this.getPlayerState(playerName);
+    if (!player) return "";
+    return `@${playerName}: lvl(${player.level})
+      ${player.heroStats.pv}❤️‍🔥
+      ${player.heroStats.regen}🍯
+      ${player.heroStats.power}⚔️
+      ${player.heroStats.critic}%✨
+      ${player.heroStats.speed}%⚡
+      ${player.heroStats.dodge}%😶‍🌫️
+`;
   }
 
-  addPlayer(id: string, name: string) {
+  async saveGame() {
+    return saveData({ players: this.players }).catch(() => {});
+  }
+
+  async addPlayer(id: string, name: string) {
     if (this.players.some((p) => p.id === id)) return;
     const findStored = this.storedPlayers.find((p) => p.id === id);
     const newPlayer: Player = {
@@ -94,6 +121,6 @@ export class Game {
     };
     if (!findStored) this.storedPlayers.push(newPlayer);
     this.players.push(findStored || newPlayer);
-    this.saveGame();
+    return this.saveGame();
   }
 }

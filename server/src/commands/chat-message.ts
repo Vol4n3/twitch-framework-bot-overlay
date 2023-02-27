@@ -1,6 +1,6 @@
-import { MessageListener } from "../../listeners";
+import { CommandListener } from "../listeners";
 
-export const ChatMessage: MessageListener = ({
+export const ChatMessage: CommandListener = async ({
   user,
   gameInstance,
   userId,
@@ -8,7 +8,7 @@ export const ChatMessage: MessageListener = ({
   rawText,
 }) => {
   // on speak in chat , player join the game
-  gameInstance.addPlayer(userId, user);
+  await gameInstance.addPlayer(userId, user);
   clientSockets.forEach((socket) => {
     // sent socket when game State change
     socket.emit("gameState", gameInstance.state);

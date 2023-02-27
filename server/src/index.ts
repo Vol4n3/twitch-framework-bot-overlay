@@ -10,15 +10,10 @@ import {
   ServerToClientEvents,
   SocketData,
 } from "../../shared/src/shared-socket";
-import {
-  ClientSocket,
-  commandListeners,
-  messageListeners,
-  rewardListeners,
-} from "./listeners";
+import { ClientSocket, commandListeners, rewardListeners } from "./listeners";
 import { EventSubWsListener } from "@twurple/eventsub-ws";
 import { createServer } from "http";
-import { Game } from "./game/game";
+import { HeroGame } from "./game/hero-game";
 const open = require("open");
 import fetch from "node-fetch";
 import {
@@ -196,8 +191,12 @@ const clearReward = async ({ apiClient }: { apiClient: ApiClient }) => {
 const usersBlacklist = ["moobot"].map((m) => m.toLowerCase());
 connection().then(({ pubSubClient, chatClient, apiClient }) => {
   console.log("connected to twitch");
-  const gameInstance = new Game();
-
+  const gameInstance = new HeroGame();
+  clearReward({ apiClient })
+    .then(() => {
+      // comment this if you d'ont want clean redemptions after 24h
+    })
+    .catch((reason) => console.error(reason));
   let clientSockets: ClientSocket[] = [];
   ioServer.on("connection", (socket) => {
     clientSockets.push(socket);
@@ -211,12 +210,15 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
   pubSubClient.onRedemption(BROADCASTER_ID, (message) => {
     rewardListeners.forEach((cb) => {
       cb({
-        channel: BROADCASTER_ID,
+        channel: message.channelId,
         user: message.userName,
-        title: message.rewardTitle,
+        rewardTitle: message.rewardTitle,
         userId: message.userId,
         message: message.message,
         gameInstance,
+        clientSockets,
+        chatClient,
+        apiClient,
       });
     });
   });
@@ -237,29 +239,16 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
         ? first.replace("!", "").toLowerCase()
         : "";
       command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      console.log(channel, "channel");
       commandListeners.forEach((cb) => {
-        if (!command) return;
-
-        cb({
-          channel,
-          user,
-          command,
-          meta,
-          args,
-          chatClient,
-          apiClient,
-          clientSockets,
-          userId: meta.userInfo.userId,
-          gameInstance,
-        });
-      });
-      messageListeners.forEach((cb) => {
         cb({
           channel,
           user,
           rawText: text,
+          command,
           meta,
           parsedText,
+          args,
           chatClient,
           apiClient,
           clientSockets,

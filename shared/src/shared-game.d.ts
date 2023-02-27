@@ -4,6 +4,7 @@ export interface HeroStats {
   speed: number;
   dodge: number;
   critic: number;
+  regen: number;
 }
 export interface Player {
   id: string;

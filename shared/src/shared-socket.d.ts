@@ -11,7 +11,12 @@ export interface ServerToClientEvents {
   chatMessage: (data: { message: string; user: string }) => void;
 }
 
-export interface ClientToServerEvents {}
+export interface ClientToServerEvents {
+  playerAttack: (data: {
+    attacker: PlayerWithHeroStats;
+    target: PlayerWithHeroStats;
+  }) => void;
+}
 
 export interface InterServerEvents {}
 

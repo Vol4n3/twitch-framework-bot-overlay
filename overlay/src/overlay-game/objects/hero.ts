@@ -1,48 +1,186 @@
-import { Easing, Item2Scene, Point, Scene2d } from "jcv-ts-utils";
+import {
+  ArrayUtils,
+  Easing,
+  Item2Scene,
+  Point,
+  Rectangle,
+  Scene2d,
+} from "jcv-ts-utils";
 import { PlayerWithHeroStats } from "../../../../shared/src/shared-game";
 import Point2 = Point.Point2;
+import { AnimationName } from "./sprite-animation";
+import { AventurerSpriteAnimations } from "./adventurer-sprite";
 
 export class Hero implements Item2Scene {
   isUpdated: boolean = true;
   scenePriority: number = 0;
   velocity: Point2;
-  width: number = 40;
-  height: number = 65;
-  grounded: boolean = false;
-  private messageBox: HTMLElement | null = null;
+  spriteWidth: number = 50;
+  spriteHeight: number = 37;
+  scale: number = 4;
 
+  width: number = this.spriteWidth * this.scale;
+  height: number = this.spriteHeight * this.scale;
+  animationName: AnimationName = "walk";
+  grounded: boolean = false;
+  lastAttack: Hero | null = null;
+  private messageBox: HTMLElement | null = null;
+  private frameCount = 0;
+  private health: number;
+
+  set player(p: PlayerWithHeroStats) {
+    this._player = p;
+    this.velocity = {
+      x:
+        (1 + this._player.heroStats.speed / 10) *
+        (this.velocity.x > 1 ? 1 : -1),
+      y: this.velocity.y,
+    };
+    this.health = this._player.heroStats.pv;
+  }
+  get player() {
+    return this._player;
+  }
   constructor(
-    public player: PlayerWithHeroStats,
+    private _player: PlayerWithHeroStats,
     public position: Point2 = { x: 200, y: 0 },
-    private container: HTMLElement
+    private container: HTMLElement,
+    private spriteSheet: HTMLImageElement
   ) {
-    this.velocity = { x: 1 + player.heroStats.speed / 100, y: 0 };
+    this.velocity = { x: 1 + _player.heroStats.speed / 10, y: 0 };
+    this.health = _player.heroStats.pv;
   }
 
-  // @ts-ignore
+  getRect(): Rectangle.Rectangle2 {
+    return {
+      x: this.position.x + this.width / 2,
+      y: this.position.y,
+      w: this.width - this.width / 2,
+      h: this.height,
+    };
+  }
+  floatingMessage: {
+    text: string;
+    delay: number;
+    elevation: number;
+    color: string;
+    size: number;
+  } | null = null;
   draw2d(scene: Scene2d): void {
     const { ctx } = scene;
     const { x, y } = this.position;
+    scene.ctx.imageSmoothingEnabled = false;
     ctx.translate(x, y);
-    ctx.beginPath();
-    ctx.rect(0, 0, this.width, this.height);
-    ctx.closePath();
-    ctx.fillStyle = "red";
-    ctx.fill();
+    ctx.save();
+    if (this.velocity.x < 0) {
+      ctx.translate(this.width, 0);
+      ctx.scale(-1, 1);
+    }
+    const { sprites, delay } = AventurerSpriteAnimations[this.animationName];
+    const loop = (this.frameCount / delay) % sprites.length;
+    const animationFrame = sprites.at(loop);
+
+    if (typeof animationFrame !== "undefined") {
+      ctx.drawImage(
+        this.spriteSheet,
+        this.spriteWidth * animationFrame,
+        0,
+        this.spriteWidth,
+        this.spriteHeight,
+        0,
+        0,
+        this.width,
+        this.height
+      );
+      this.frameCount++;
+    }
+    ctx.restore();
     scene.writeText({
       x: this.width / 2,
       y: -10,
-      text: this.player.name,
+      text: `${this._player.name}
+      ${this.health}❤️‍🔥`,
       textAlign: "center",
-      fillStyle: "red",
+
+      fillStyle: "white",
     });
+    if (this.floatingMessage) {
+      scene.writeText({
+        x: this.width / 2,
+        y: -30 + this.floatingMessage.elevation,
+        text: `${this.floatingMessage.text}`,
+        textAlign: "center",
+        font: { type: "sans-serif", size: this.floatingMessage.size },
+        fillStyle: this.floatingMessage.color,
+      });
+      this.floatingMessage.elevation -= 1;
+      this.floatingMessage.delay--;
+      if (this.floatingMessage.delay < 0) {
+        this.floatingMessage = null;
+      }
+    }
   }
 
   onResize(): void {}
 
-  update(scene: Scene2d): void {
+  setAnimation(name: AnimationName, after?: number) {
+    if (after) {
+      setTimeout(() => {
+        this.frameCount = 0;
+        this.animationName = name;
+      }, after);
+      return;
+    }
+    if (name === this.animationName) return;
+    this.frameCount = 0;
+    this.animationName = name;
+  }
+
+  shakeCamera(scene: Scene2d) {
+    scene.addEasing({
+      easing: Easing.easeShakeOut(8),
+      scale: 5,
+      onNext: (n: number) => (scene.camera.y = n),
+      start: scene.camera.y,
+      time: 10,
+    });
+    scene.addEasing({
+      easing: Easing.easeShake(3),
+      scale: 5,
+      onNext: (n: number) => (scene.camera.x = n),
+      start: scene.camera.x,
+      time: 10,
+    });
+  }
+
+  update(scene: Scene2d, count: number): void {
     const { height, width } = scene;
     this.isUpdated = true;
+    const { regen, pv, speed } = this._player.heroStats;
+    if (count % 2000 === 0) {
+      this.health += this.health <= 0 ? pv : regen;
+      if (this.health > pv) {
+        this.health = pv;
+      }
+    }
+    if (this.messageBox) {
+      const left = this.position.x;
+      const top = this.position.y - this.messageBox.clientHeight - 40;
+      this.messageBox.style.left = `${left}px`;
+      this.messageBox.style.top = `${top}px`;
+    }
+    if (
+      this.animationName === "getUp" ||
+      this.animationName === "down" ||
+      this.animationName === "knockDown"
+    ) {
+      if (this.health > 0) {
+        this.setAnimation("getUp");
+        this.setAnimation("walk", 600);
+      }
+      return;
+    }
+
     this.position = Point.operation("add", this.position, this.velocity);
     const limitGround = height - this.height;
     if (!this.grounded) {
@@ -51,23 +189,30 @@ export class Hero implements Item2Scene {
         this.position.y = limitGround;
         this.velocity.y = 0;
         const sign = this.velocity.x > 0 ? 1 : -1;
-        this.velocity.x = sign * (1 + this.player.heroStats.speed / 100);
-        scene.addEasing({
-          easing: Easing.easeShakeOut(8),
-          scale: 5,
-          onNext: (n: number) => (scene.camera.y = n),
-          start: scene.camera.y,
-          time: 10,
-        });
-        scene.addEasing({
-          easing: Easing.easeShake(3),
-          scale: 5,
-          onNext: (n: number) => (scene.camera.x = n),
-          start: scene.camera.x,
-          time: 10,
-        });
+        this.velocity.x = sign * (1 + speed / 10);
+        this.setAnimation("slideAndUp");
+        this.setAnimation("walk", 850);
+        this.shakeCamera(scene);
       } else {
+        if (this.velocity.y > 0) {
+          this.setAnimation("fall");
+        }
+
         this.velocity.y++;
+      }
+    } else {
+      if (
+        this.animationName === "run" ||
+        this.animationName === "idle" ||
+        this.animationName === "walk"
+      ) {
+        if (Math.abs(this.velocity.x) > 4) {
+          this.setAnimation("run");
+        } else if (this.velocity.x === 0) {
+          this.setAnimation("idle");
+        } else {
+          this.setAnimation("walk");
+        }
       }
     }
 
@@ -75,17 +220,17 @@ export class Hero implements Item2Scene {
     if (this.position.x > limitRight) {
       this.velocity.x *= -1;
       this.position.x = limitRight;
+      if (this.animationName === "walk" || this.animationName === "run") {
+        this.lastAttack = null;
+      }
     }
     const limitLeft = 0;
     if (this.position.x < limitLeft) {
       this.velocity.x *= -1;
       this.position.x = limitLeft;
-    }
-    if (this.messageBox) {
-      const left = this.position.x - this.messageBox.clientWidth / 2;
-      const top = this.position.y - this.messageBox.clientHeight - 40;
-      this.messageBox.style.left = `${left}px`;
-      this.messageBox.style.top = `${top}px`;
+      if (this.animationName === "walk" || this.animationName === "run") {
+        this.lastAttack = null;
+      }
     }
   }
 
@@ -120,13 +265,75 @@ export class Hero implements Item2Scene {
 
   jump(x: number, y: number) {
     if (!this.grounded) return;
-    const jumpHeight = (y - this.position.y) / 25;
-    const jumpDistance = (x - this.position.x) / 25;
+    if (this.animationName !== "walk" && this.animationName !== "run") return;
+    this.setAnimation("jump");
+    setTimeout(() => {
+      const jumpHeight = (y - this.position.y) / 20;
+      const jumpDistance = (x - this.position.x) / 150;
 
-    this.velocity = {
-      y: jumpHeight,
-      x: jumpDistance,
-    };
-    this.grounded = false;
+      this.velocity = {
+        y: jumpHeight > -20 ? -20 : jumpHeight,
+        x: jumpDistance,
+      };
+      this.grounded = false;
+    }, 400);
+  }
+  public onDie: (() => void) | undefined;
+  attack(target: Hero): boolean {
+    if (this.health <= 0) return false;
+    if (this.animationName !== "run" && this.animationName !== "walk")
+      return false;
+    if (this.lastAttack) return false;
+    if (target.health <= 0) return false;
+    if (this.velocity.x > 0) {
+      if (this.position.x > target.position.x) return false;
+    } else {
+      if (this.position.x < target.position.x) return false;
+    }
+    this.lastAttack = target;
+    const rand = ArrayUtils.pickRandomOne<AnimationName>([
+      "attack1",
+      "attack3",
+      "attack2",
+    ]);
+    const isSCritic = Math.random() + this._player.heroStats.critic / 100 > 1;
+    const criticModifier = isSCritic ? 2 : 1;
+    const isDodge = Math.random() + target._player.heroStats.dodge / 100 > 1;
+    const copyVel = this.velocity.x;
+    this.setAnimation(rand);
+    this.velocity.x /= 1000;
+    setTimeout(() => {
+      if (!isDodge) {
+        const damage = this._player.heroStats.power * criticModifier;
+        target.health -= damage;
+        target.floatingMessage = {
+          delay: 50,
+          color: isSCritic ? "orange" : "yellow",
+          text: `${damage}${isSCritic ? "✨" : ""}`,
+          elevation: 0,
+          size: isSCritic ? 40 : 30,
+        };
+      } else {
+        target.floatingMessage = {
+          delay: 50,
+          color: "white",
+          text: `Esquive`,
+          elevation: 0,
+          size: 25,
+        };
+      }
+      this.velocity.x = copyVel;
+      if (target.health <= 0) {
+        target.health = 0;
+        if (this.onDie) this.onDie();
+        target.setAnimation("knockDown");
+        target.setAnimation("down", 1000);
+      } else {
+        target.setAnimation("hurt");
+        target.setAnimation("walk", 300);
+      }
+      this.setAnimation("idle");
+    }, 1000);
+    return true;
   }
 }

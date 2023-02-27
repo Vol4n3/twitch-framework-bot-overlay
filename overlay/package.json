@@ -16,7 +16,7 @@
     "@types/node": "16.18.12"
   },
   "dependencies": {
-    "jcv-ts-utils": "^1.1.6",
+    "jcv-ts-utils": "^1.1.7",
     "socket.io-client": "^4.6.1"
   }
 }

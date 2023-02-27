@@ -1,5 +1,4 @@
 import { CommandListener } from "../listeners";
-import { PlayerWithHeroStats } from "../../../shared/src/shared-game";
 
 export const HeroStat: CommandListener = ({
   channel,
@@ -11,18 +10,8 @@ export const HeroStat: CommandListener = ({
 }) => {
   if (command === "hero") {
     const name = args[0] || user;
-    const player: PlayerWithHeroStats | undefined =
-      gameInstance.state.players.find((p) => p.name === name);
-    if (!player) return;
-    chatClient.say(
-      channel,
-      `@${name}: lvl(${player.level})
-      ${player.heroStats.pv}❤️‍🔥
-      ${player.heroStats.power}⚔️
-      ${player.heroStats.critic}%✨
-      ${player.heroStats.speed}%⚡
-      ${player.heroStats.dodge}%😶‍🌫️
-`
-    );
+    const message: string = gameInstance.playerStateToString(name);
+    if (!message) return;
+    chatClient.say(channel, message);
   }
 };

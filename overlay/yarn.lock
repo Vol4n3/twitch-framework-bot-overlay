@@ -275,10 +275,10 @@ is-number@^7.0.0:
   resolved "https://registry.yarnpkg.com/is-number/-/is-number-7.0.0.tgz#7535345b896734d5f80c4d06c50955527a14f12b"
   integrity sha512-41Cifkg6e8TylSpdtTpeLVMqvSBEVzTttHvERD741+pnZ8ANv0004MRL43QKPDlK9cGvNp6NZWZUBlbGXYxxng==
 
-jcv-ts-utils@^1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/jcv-ts-utils/-/jcv-ts-utils-1.1.6.tgz#5e3d013829fd4372f1968191c816a999fdd17e51"
-  integrity sha512-bDep9E1iAcUbEzI44GY06P/Lctbs4zB2LtdfXMCvX16SUw02kukEBrg3QXHZjkzlGRMCHCe7AE9a5swIWWke7g==
+jcv-ts-utils@^1.1.7:
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/jcv-ts-utils/-/jcv-ts-utils-1.1.7.tgz#4a553dac4c919d034c39de451f13b7f7537eb4fd"
+  integrity sha512-CKkBXNMgX9K8o5Lm94597EME3Modf/KrE2g09cmS8/lWnySWbnyPHwmj44XGcxEsh3lHPUye919bq/u5dd9z1A==
 
 ms@2.1.2:
   version "2.1.2"

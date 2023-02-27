@@ -1,5 +1,5 @@
-import { CommandListener } from "../listeners";
-import { TTS } from "../messages/highlight-tts/tts";
+import { CommandListener } from "../../listeners";
+import { TTS } from "./tts";
 const Julie = "Microsoft Julie";
 const Paul = "Microsoft Paul";
 const Haruka = "Microsoft Haruka Desktop";
