@@ -7,12 +7,13 @@ export interface ServerToClientEvents {
   gameState: (data: GameData<PlayerWithHeroStats>) => void;
   playSound: (data: soundOption) => void;
   playMultipleSound: (data: string[]) => void;
+  playVideo: (data: string) => void;
 
   chatMessage: (data: { message: string; user: string }) => void;
 }
 
 export interface ClientToServerEvents {
-  playerAttack: (data: {
+  playerKill: (data: {
     attacker: PlayerWithHeroStats;
     target: PlayerWithHeroStats;
   }) => void;

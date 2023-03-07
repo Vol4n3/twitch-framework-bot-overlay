@@ -10,6 +10,7 @@ const {
   SERVER_ADDRESS = "config it in .env",
   SERVER_PORT = "config it in .env",
   SOUNDS_PATH = "config it in .env",
+  VIDEOS_PATH = "config it in .env",
   STORAGE_FOLDER = "config it in .env",
 } = process.env;
 
@@ -21,5 +22,6 @@ export {
   SERVER_ADDRESS,
   SERVER_PORT,
   SOUNDS_PATH,
+  VIDEOS_PATH,
   STORAGE_FOLDER,
 };

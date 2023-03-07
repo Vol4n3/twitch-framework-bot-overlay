@@ -36,7 +36,6 @@ export class Hero implements Item2Scene {
         (this.velocity.x > 1 ? 1 : -1),
       y: this.velocity.y,
     };
-    this.health = this._player.heroStats.pv;
   }
   get player() {
     return this._player;
@@ -278,7 +277,7 @@ export class Hero implements Item2Scene {
       this.grounded = false;
     }, 400);
   }
-  public onDie: (() => void) | undefined;
+  public onDie: ((killer: Hero) => void) | undefined;
   attack(target: Hero): boolean {
     if (this.health <= 0) return false;
     if (this.animationName !== "run" && this.animationName !== "walk")
@@ -325,7 +324,8 @@ export class Hero implements Item2Scene {
       this.velocity.x = copyVel;
       if (target.health <= 0) {
         target.health = 0;
-        if (this.onDie) this.onDie();
+        if (target.onDie) target.onDie(this);
+
         target.setAnimation("knockDown");
         target.setAnimation("down", 1000);
       } else {

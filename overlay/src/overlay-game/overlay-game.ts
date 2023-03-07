@@ -5,9 +5,8 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "../../../shared/src/shared-socket";
-import { ArrayUtils, Intersection, loadImage, Scene2d } from "jcv-ts-utils";
+import { Intersection, loadImage, Scene2d } from "jcv-ts-utils";
 import { Hero } from "./objects/hero";
-import { HeroStats } from "../../../shared/src/shared-game";
 
 const { VITE_SERVER_ADDRESS, VITE_BROADCAST_ID } = import.meta.env;
 const init = async () => {
@@ -29,12 +28,12 @@ const init = async () => {
       id: "boss",
       name: "Boss",
       heroStats: {
-        speed: 2,
+        speed: 10,
         power: 2,
-        pv: 20,
-        critic: 5,
+        pv: 30,
+        critic: 10,
 
-        dodge: 5,
+        dodge: 10,
         regen: 1,
       },
       level: 1,
@@ -81,13 +80,7 @@ const init = async () => {
         heroes.forEach((b) => {
           if (a === b) return;
           if (Intersection.rectInRect(a.getRect(), b.getRect())) {
-            const successAttack = a.attack(b);
-            if (successAttack) {
-              socket.emit("playerAttack", {
-                attacker: a.player,
-                target: b.player,
-              });
-            }
+            a.attack(b);
           }
         });
       });
@@ -112,16 +105,11 @@ const init = async () => {
             container,
             spriteSheet
           );
-          hero.onDie = () => {
-            const rand = ArrayUtils.pickRandomOne<keyof HeroStats>([
-              "dodge",
-              "critic",
-              "power",
-              "pv",
-              "regen",
-              "speed",
-            ]);
-            boss.player.heroStats[rand] += 1;
+          hero.onDie = (killer) => {
+            socket.emit("playerKill", {
+              target: hero.player,
+              attacker: killer.player,
+            });
           };
           scene.addItem(hero);
           return hero;

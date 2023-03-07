@@ -1,6 +1,6 @@
 import { ChatClient, PrivateMessage } from "@twurple/chat";
 import { ApiClient } from "@twurple/api";
-import { Socket } from "socket.io";
+import { Server, Socket } from "socket.io";
 import {
   ClientToServerEvents,
   InterServerEvents,
@@ -8,27 +8,26 @@ import {
   SocketData,
 } from "../../shared/src/shared-socket";
 import { HeroGame } from "./game/hero-game";
-import { ChatMessage } from "./commands/chat-message";
-import { HeroStat } from "./commands/hero-stat";
-import { SoundListener } from "./commands/sound";
-import { TTSCommand } from "./commands/highlight-tts/tts-command";
-import { HeroReward } from "./rewards/heroes/hero-reward";
+import { HeroChat } from "./message-listeners/hero-chat";
+import { HeroStat } from "./message-listeners/hero-stat";
+import { MediaListener } from "./message-listeners/medias";
+import { TtsListener } from "./message-listeners/tts-listener";
+import { HeroReward } from "./reward-listeners/heroes/hero-reward";
 
 export const commandListeners: CommandListener[] = [
-  TTSCommand,
+  HeroChat,
+  TtsListener,
   HeroStat,
-  SoundListener,
-  ChatMessage,
+  MediaListener,
 ];
 export const rewardListeners: RewardListener[] = [HeroReward];
 
-export type ClientSocket = Socket<
+export type ServerSocket = Server<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,
   SocketData
 >;
-
 export type CommandListener = (data: {
   channel: string;
   rawText: string;
@@ -40,9 +39,9 @@ export type CommandListener = (data: {
   args: string[];
   chatClient: ChatClient;
   apiClient: ApiClient;
-  clientSockets: ClientSocket[];
   gameInstance: HeroGame;
-}) => void;
+  socket: ServerSocket;
+}) => Promise<void | boolean>;
 
 export type RewardListener = (data: {
   channel: string;
@@ -53,5 +52,5 @@ export type RewardListener = (data: {
   gameInstance: HeroGame;
   chatClient: ChatClient;
   apiClient: ApiClient;
-  clientSockets: ClientSocket[];
+  socket: ServerSocket;
 }) => void;

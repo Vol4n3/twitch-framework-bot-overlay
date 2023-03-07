@@ -4,17 +4,10 @@ import { ChatClient, PrivateMessage } from "@twurple/chat";
 import { promises as fs } from "fs";
 import { ApiClient } from "@twurple/api";
 import { PubSubClient } from "@twurple/pubsub";
-import {
-  ClientToServerEvents,
-  InterServerEvents,
-  ServerToClientEvents,
-  SocketData,
-} from "../../shared/src/shared-socket";
-import { ClientSocket, commandListeners, rewardListeners } from "./listeners";
+import { commandListeners, rewardListeners, ServerSocket } from "./listeners";
 import { EventSubWsListener } from "@twurple/eventsub-ws";
 import { createServer } from "http";
 import { HeroGame } from "./game/hero-game";
-const open = require("open");
 import fetch from "node-fetch";
 import {
   BROADCASTER_ID,
@@ -26,11 +19,15 @@ import {
   TWITCH_CLIENT,
   TWITCH_SECRET,
 } from "./configs";
-import { initSounds } from "./commands/sound";
+import { initMedias } from "./message-listeners/medias";
+import { HeroStats } from "../../shared/src/shared-game";
+import { ArrayUtils } from "jcv-ts-utils";
+
+const open = require("open");
 
 fs.mkdir(`./${STORAGE_FOLDER}`).catch(() => {});
 fs.mkdir(SOUNDS_PATH).catch(() => {});
-initSounds().catch((reason) => {
+initMedias().catch((reason) => {
   console.log(reason);
 });
 
@@ -57,12 +54,7 @@ const httpServer = createServer((req, res) => {
   res.writeHead(200);
   res.end(`{"message": "ok"}`);
 });
-const ioServer: Server<
-  ClientToServerEvents,
-  ServerToClientEvents,
-  InterServerEvents,
-  SocketData
-> = new Server(httpServer, {
+const socket: ServerSocket = new Server(httpServer, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
@@ -189,7 +181,9 @@ const clearReward = async ({ apiClient }: { apiClient: ApiClient }) => {
   }
 };
 const usersBlacklist = ["moobot"].map((m) => m.toLowerCase());
-connection().then(({ pubSubClient, chatClient, apiClient }) => {
+connection().then(async ({ pubSubClient, chatClient, apiClient }) => {
+  const channelInfo = await apiClient.users.getUserById(BROADCASTER_ID);
+
   console.log("connected to twitch");
   const gameInstance = new HeroGame();
   clearReward({ apiClient })
@@ -197,28 +191,37 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
       // comment this if you d'ont want clean redemptions after 24h
     })
     .catch((reason) => console.error(reason));
-  let clientSockets: ClientSocket[] = [];
-  ioServer.on("connection", (socket) => {
-    clientSockets.push(socket);
-    console.log("a client is connected", clientSockets.length);
+  socket.on("connection", (socket) => {
+    console.log("a socket client is connected");
     socket.emit("gameState", gameInstance.state);
     socket.on("disconnect", () => {
-      clientSockets = clientSockets.filter((s) => s !== socket);
-      console.log("a client is disconnected", clientSockets.length);
+      console.log("a socket client is disconnected");
+    });
+    socket.on("playerKill", (data) => {
+      const rand = ArrayUtils.pickRandomOne<keyof HeroStats>([
+        "dodge",
+        "critic",
+        "power",
+        "pv",
+        "regen",
+        "speed",
+      ]);
+      gameInstance.addPoint(data.attacker.name, rand, 1);
     });
   });
-  pubSubClient.onRedemption(BROADCASTER_ID, (message) => {
+  pubSubClient.onRedemption(BROADCASTER_ID, async (message) => {
+    console.log(message.channelId);
     rewardListeners.forEach((cb) => {
       cb({
-        channel: message.channelId,
+        channel: channelInfo?.name || message.channelId,
         user: message.userName,
         rewardTitle: message.rewardTitle,
         userId: message.userId,
         message: message.message,
         gameInstance,
-        clientSockets,
         chatClient,
         apiClient,
+        socket,
       });
     });
   });
@@ -236,12 +239,12 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
       const parsedText = extractEmotes.join(" ");
       const [first, ...args] = parsedText.split(" ");
       let command = first.startsWith("!")
-        ? first.replace("!", "").toLowerCase()
+        ? first.replace(/!/g, "").toLowerCase()
         : "";
+
       command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      console.log(channel, "channel");
-      commandListeners.forEach((cb) => {
-        cb({
+      for (let i = 0; i < commandListeners.length; i++) {
+        const cancelNext = await commandListeners[i]({
           channel,
           user,
           rawText: text,
@@ -251,11 +254,12 @@ connection().then(({ pubSubClient, chatClient, apiClient }) => {
           args,
           chatClient,
           apiClient,
-          clientSockets,
           userId: meta.userInfo.userId,
           gameInstance,
+          socket,
         });
-      });
+        if (cancelNext) break;
+      }
     }
   );
 });
