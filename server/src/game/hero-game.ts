@@ -5,7 +5,7 @@ import {
   Player,
   PlayerWithHeroStats,
 } from "../../../shared/src/shared-game";
-import { NumberUtils } from "jcv-ts-utils";
+import { ArrayUtils, NumberUtils } from "jcv-ts-utils";
 import { STORAGE_FOLDER } from "../configs";
 
 const dataPath = `./${STORAGE_FOLDER}/game.json`;
@@ -35,13 +35,14 @@ const pointToStat = ({
   dodge,
   regen,
 }: HeroStats): HeroStats => {
+  // stats en fonction de la classe Choisi ( monk , guerrier, mage )
   return {
-    critic: NumberUtils.round(scaleHyperTangent(critic, 200, 50, 5), 100),
-    dodge: NumberUtils.round(scaleHyperTangent(dodge, 200, 50, 5), 100),
-    power: NumberUtils.round(scaleHyperTangent(power, 200, 60, 2), 1),
-    pv: NumberUtils.round(scaleHyperTangent(pv, 200, 200, 10), 1),
-    regen: NumberUtils.round(scaleHyperTangent(regen, 200, 30, 1), 1),
-    speed: NumberUtils.round(scaleHyperTangent(speed, 200, 100, 0), 1),
+    critic: NumberUtils.round(scaleHyperTangent(critic, 500, 60, 1), 100),
+    dodge: NumberUtils.round(scaleHyperTangent(dodge, 500, 60, 1), 100),
+    power: NumberUtils.round(scaleHyperTangent(power, 500, 100, 2), 1),
+    pv: NumberUtils.round(scaleHyperTangent(pv, 500, 400, 10), 1),
+    regen: NumberUtils.round(scaleHyperTangent(regen, 500, 40, 1), 1),
+    speed: NumberUtils.round(scaleHyperTangent(speed, 500, 200, 0), 1),
   };
 };
 
@@ -58,17 +59,7 @@ function calcLvl(points: HeroStats): number {
 
 export class HeroGame {
   players: Player[] = [];
-  private storedPlayers: Player[] = [];
-
-  constructor() {
-    loadData()
-      .then(({ players }) => {
-        this.storedPlayers = players;
-      })
-      .catch(() => {
-        this.saveGame();
-      });
-  }
+  constructor() {}
 
   get state(): GameData<PlayerWithHeroStats> {
     return {
@@ -80,6 +71,14 @@ export class HeroGame {
     };
   }
 
+  async getStored(): Promise<GameData<Player>> {
+    const state = await loadData().catch(() => console.log("create game file"));
+    return state || { players: [] };
+  }
+
+  /**
+   * @todo Refact ce code pour utilise les id et non les playername
+   */
   async addPoint(playerName: string, which: keyof HeroStats, amount: number) {
     this.players = this.players.map((player) => {
       if (player.name !== playerName) return player;
@@ -90,9 +89,11 @@ export class HeroGame {
     });
     return this.saveGame();
   }
+
   getPlayerState(playerName: string): PlayerWithHeroStats | undefined {
     return this.state.players.find((p) => p.name === playerName);
   }
+
   playerStateToString(playerName: string): string {
     const player: PlayerWithHeroStats | undefined =
       this.getPlayerState(playerName);
@@ -108,19 +109,65 @@ export class HeroGame {
   }
 
   async saveGame() {
-    return saveData({ players: this.players }).catch(() => {});
+    const stored = await this.getStored();
+
+    const players = stored.players.map((player) => {
+      const findStored = this.players.find((p) => p.id === player.id);
+      return findStored ? findStored : player;
+    });
+    const notStored = this.players.filter((player) => {
+      return !stored.players.find((p) => p.id === player.id);
+    });
+    return saveData({ players: [...players, ...notStored] }).catch(() => {
+      console.log("error when save hero file");
+    });
   }
 
   async addPlayer(id: string, name: string) {
     if (this.players.some((p) => p.id === id)) return;
-    const findStored = this.storedPlayers.find((p) => p.id === id);
+    const stored = await this.getStored();
+    const findStored = stored.players.find((p) => p.id === id);
     const newPlayer: Player = {
       id,
       name,
       points: defaultPoints,
+      skin: "adventurer",
     };
-    if (!findStored) this.storedPlayers.push(newPlayer);
     this.players.push(findStored || newPlayer);
     return this.saveGame();
+  }
+
+  async playerKill(attacker: PlayerWithHeroStats, target: PlayerWithHeroStats) {
+    const attackerState = this.getPlayerState(attacker.name);
+    const targetState = this.getPlayerState(target.name);
+    if (!attackerState || !targetState) {
+      return;
+    }
+    const levelDiff = attackerState.level - targetState.level;
+    let winPoint = 1;
+    if (levelDiff > 10) {
+      return;
+    }
+    if (levelDiff < 0) {
+      winPoint = 2;
+    }
+    if (levelDiff < 10) {
+      winPoint = 3;
+    }
+    if (levelDiff < 20) {
+      winPoint = 4;
+    }
+    if (levelDiff < 30) {
+      winPoint = 5;
+    }
+    const rand = ArrayUtils.pickRandomOne<keyof HeroStats>([
+      "dodge",
+      "critic",
+      "power",
+      "pv",
+      "regen",
+      "speed",
+    ]);
+    await this.addPoint(attacker.name, rand, winPoint);
   }
 }

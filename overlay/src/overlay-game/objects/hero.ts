@@ -8,19 +8,16 @@ import {
 } from "jcv-ts-utils";
 import { PlayerWithHeroStats } from "../../../../shared/src/shared-game";
 import Point2 = Point.Point2;
-import { AnimationName } from "./sprite-animation";
-import { AventurerSpriteAnimations } from "./adventurer-sprite";
+import { AnimationName, SpriteSheet } from "./sprite-animation";
 
 export class Hero implements Item2Scene {
   isUpdated: boolean = true;
   scenePriority: number = 0;
-  velocity: Point2;
-  spriteWidth: number = 50;
-  spriteHeight: number = 37;
-  scale: number = 4;
+  velocity: Point2 = { x: 0, y: 0 };
 
-  width: number = this.spriteWidth * this.scale;
-  height: number = this.spriteHeight * this.scale;
+  scale: number = 4;
+  width: number = 0;
+  height: number = 0;
   animationName: AnimationName = "walk";
   grounded: boolean = false;
   lastAttack: Hero | null = null;
@@ -44,12 +41,24 @@ export class Hero implements Item2Scene {
     private _player: PlayerWithHeroStats,
     public position: Point2 = { x: 200, y: 0 },
     private container: HTMLElement,
-    private spriteSheet: HTMLImageElement
+    private spriteSheet: SpriteSheet
   ) {
-    this.velocity = { x: 1 + _player.heroStats.speed / 10, y: 0 };
+    this.width = spriteSheet.width * this.scale;
+    this.height = spriteSheet.height * this.scale;
     this.health = _player.heroStats.pv;
+    this.move();
   }
-
+  move() {
+    const direction = Math.random() > 0.5 ? 1 : -1;
+    this.velocity = {
+      x: (1 + this._player.heroStats.speed / 10) * direction,
+      y: 0,
+    };
+  }
+  stop() {
+    const direction = Math.random() > 0.5 ? 0 : -0;
+    this.velocity = { x: direction, y: 0 };
+  }
   getRect(): Rectangle.Rectangle2 {
     return {
       x: this.position.x + this.width / 2,
@@ -75,17 +84,17 @@ export class Hero implements Item2Scene {
       ctx.translate(this.width, 0);
       ctx.scale(-1, 1);
     }
-    const { sprites, delay } = AventurerSpriteAnimations[this.animationName];
+    const { sprites, delay } = this.spriteSheet.animations[this.animationName];
     const loop = (this.frameCount / delay) % sprites.length;
     const animationFrame = sprites.at(loop);
 
     if (typeof animationFrame !== "undefined") {
       ctx.drawImage(
-        this.spriteSheet,
-        this.spriteWidth * animationFrame,
+        this.spriteSheet.image,
+        this.spriteSheet.width * animationFrame,
         0,
-        this.spriteWidth,
-        this.spriteHeight,
+        this.spriteSheet.width,
+        this.spriteSheet.height,
         0,
         0,
         this.width,
@@ -98,9 +107,10 @@ export class Hero implements Item2Scene {
       x: this.width / 2,
       y: -10,
       text: `${this._player.name}
-      ${this.health}❤️‍🔥`,
+      lvl${this._player.level} - ${this.health}❤️‍🔥`,
       textAlign: "center",
-
+      strokeStyle: "black",
+      lineWidth: 0.5,
       fillStyle: "white",
     });
     if (this.floatingMessage) {
@@ -151,11 +161,32 @@ export class Hero implements Item2Scene {
       time: 10,
     });
   }
-
+  isWander() {
+    return (
+      this.animationName === "run" ||
+      this.animationName === "idle" ||
+      this.animationName === "walk"
+    );
+  }
   update(scene: Scene2d, count: number): void {
     const { height, width } = scene;
     this.isUpdated = true;
     const { regen, pv, speed } = this._player.heroStats;
+    if (count % 500 === 0) {
+      if (this.isWander()) {
+        if (this.animationName === "idle") {
+          const rand = Math.random() > 0.3;
+          if (rand) {
+            this.move();
+          }
+        } else {
+          const rand = Math.random() > 0.7;
+          if (rand) {
+            this.stop();
+          }
+        }
+      }
+    }
     if (count % 2000 === 0) {
       this.health += this.health <= 0 ? pv : regen;
       if (this.health > pv) {
@@ -179,7 +210,6 @@ export class Hero implements Item2Scene {
       }
       return;
     }
-
     this.position = Point.operation("add", this.position, this.velocity);
     const limitGround = height - this.height;
     if (!this.grounded) {
@@ -200,11 +230,7 @@ export class Hero implements Item2Scene {
         this.velocity.y++;
       }
     } else {
-      if (
-        this.animationName === "run" ||
-        this.animationName === "idle" ||
-        this.animationName === "walk"
-      ) {
+      if (this.isWander()) {
         if (Math.abs(this.velocity.x) > 4) {
           this.setAnimation("run");
         } else if (this.velocity.x === 0) {
@@ -215,7 +241,7 @@ export class Hero implements Item2Scene {
       }
     }
 
-    const limitRight = width - this.width;
+    const limitRight = width - this.width / 2;
     if (this.position.x > limitRight) {
       this.velocity.x *= -1;
       this.position.x = limitRight;
@@ -223,7 +249,7 @@ export class Hero implements Item2Scene {
         this.lastAttack = null;
       }
     }
-    const limitLeft = 0;
+    const limitLeft = 0 - this.width / 2;
     if (this.position.x < limitLeft) {
       this.velocity.x *= -1;
       this.position.x = limitLeft;

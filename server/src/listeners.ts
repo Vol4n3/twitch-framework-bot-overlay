@@ -13,6 +13,7 @@ import { HeroStat } from "./message-listeners/hero-stat";
 import { MediaListener } from "./message-listeners/medias";
 import { TtsListener } from "./message-listeners/tts-listener";
 import { HeroReward } from "./reward-listeners/heroes/hero-reward";
+import OBSWebSocket from "obs-websocket-js";
 
 export const commandListeners: CommandListener[] = [
   HeroChat,
@@ -41,6 +42,7 @@ export type CommandListener = (data: {
   apiClient: ApiClient;
   gameInstance: HeroGame;
   socket: ServerSocket;
+  obs: OBSWebSocket;
 }) => Promise<void | boolean>;
 
 export type RewardListener = (data: {
@@ -53,4 +55,5 @@ export type RewardListener = (data: {
   chatClient: ChatClient;
   apiClient: ApiClient;
   socket: ServerSocket;
+  obs: OBSWebSocket;
 }) => void;

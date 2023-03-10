@@ -1,6 +1,11 @@
 # Twitch framework for chatbot and overlay
 
 Tested on windows only
+## requirement
+
+node 18+
+
+obs plugins https://github.com/obsproject/obs-websocket/releases
 
 ## Config
 

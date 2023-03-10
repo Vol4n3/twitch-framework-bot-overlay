@@ -7,50 +7,56 @@ import {
 } from "../../../shared/src/shared-socket";
 import { Intersection, loadImage, Scene2d } from "jcv-ts-utils";
 import { Hero } from "./objects/hero";
+import { HeroSkin } from "../../../shared/src/shared-game";
+import { SpriteSheet } from "./objects/sprite-animation";
+import { aventurerSpriteAnimations } from "./objects/animation/adventurer-sprite";
+import { chevalierSpriteAnimations } from "./objects/animation/chevalier-sprite";
 
 const { VITE_SERVER_ADDRESS, VITE_BROADCAST_ID } = import.meta.env;
+const buildSpriteSheet = async (): Promise<{
+  [key in HeroSkin]: SpriteSheet;
+}> => {
+  const [adventurer, blueAdventurer, chevalier] = await Promise.all([
+    loadImage("/assets/img/adventurer-sheet.png"),
+    loadImage("/assets/img/adventurer-sheet-blue.png"),
+    loadImage("/assets/img/chevalier-sheet.png"),
+  ]);
+  return {
+    adventurer: {
+      image: adventurer,
+      animations: aventurerSpriteAnimations,
+      width: 50,
+      height: 37,
+    },
+    blueAdventurer: {
+      image: blueAdventurer,
+      animations: aventurerSpriteAnimations,
+      width: 50,
+      height: 37,
+    },
+    chevalier: {
+      image: chevalier,
+      animations: chevalierSpriteAnimations,
+      width: 128,
+      height: 64,
+    },
+  };
+};
 const init = async () => {
   const container = document.getElementById("scene");
   if (!container) return;
   const scene = new Scene2d(container);
 
-  const spriteSheet = await loadImage("/assets/img/adventurer-sheet.png");
-  const blueSpriteSheet = await loadImage(
-    "/assets/img/adventurer-sheet-blue.png"
-  );
+  const spriteSheets = await buildSpriteSheet();
 
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
     io(VITE_SERVER_ADDRESS);
   const heroes: Hero[] = [];
 
-  const boss = new Hero(
-    {
-      id: "boss",
-      name: "Boss",
-      heroStats: {
-        speed: 10,
-        power: 2,
-        pv: 30,
-        critic: 10,
-
-        dodge: 10,
-        regen: 1,
-      },
-      level: 1,
-      points: { speed: 0, power: 5, pv: 20, critic: 1, dodge: 1, regen: 1 },
-    },
-    {
-      x: (Math.random() * scene.width) / 2,
-      y: 0,
-    },
-    container,
-    blueSpriteSheet
-  );
-  scene.addItem(boss);
-  heroes.push(boss);
   container.addEventListener("click", (e) => {
     heroes[0].jump(e.x, e.y);
   });
+
   const connectionToHeat = () => {
     let heat = new WebSocket(
       `wss://heat-api.j38.net/channel/${VITE_BROADCAST_ID}`
@@ -85,6 +91,7 @@ const init = async () => {
         });
       });
     });
+
     socket.on("gameState", async (data) => {
       heroes.forEach((hero) => {
         const find = data.players.find((f) => f.id === hero.player.id);
@@ -103,7 +110,7 @@ const init = async () => {
               y: 0,
             },
             container,
-            spriteSheet
+            spriteSheets[newPlayer.skin]
           );
           hero.onDie = (killer) => {
             socket.emit("playerKill", {

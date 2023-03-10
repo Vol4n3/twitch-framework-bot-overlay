@@ -1,8 +1,6 @@
-import { AnimationName, SpriteSheetDefinition } from "./sprite-animation";
+import { SpritesAnimation } from "../sprite-animation";
 
-export const AventurerSpriteAnimations: {
-  [key in AnimationName]: SpriteSheetDefinition;
-} = {
+export const aventurerSpriteAnimations: SpritesAnimation = {
   walk: {
     delay: 12,
     sprites: [155, 156, 157, 158, 159, 160],

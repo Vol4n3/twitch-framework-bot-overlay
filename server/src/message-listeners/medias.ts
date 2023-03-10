@@ -1,6 +1,11 @@
 import { CommandListener } from "../listeners";
 import { promises as fs } from "fs";
-import { SOUNDS_PATH, VIDEOS_PATH } from "../configs";
+import {
+  SOUNDS_PATH,
+  GREEN_VIDEOS_FOLDER,
+  STANDARD_VIDEOS_FOLDER,
+  VIDEOS_PATH,
+} from "../configs";
 import { ArrayUtils } from "jcv-ts-utils";
 import pickRandomOne = ArrayUtils.pickRandomOne;
 
@@ -8,18 +13,24 @@ interface MediaDef {
   fileName: string;
   id: string;
 }
-type mediasType = "sounds" | "videos";
+type mediasType = "sounds" | "videos" | "greenVideo";
 const medias: { [key in mediasType]: MediaDef[] } = {
   sounds: [],
   videos: [],
+  greenVideo: [],
 };
 
 export async function initMedias() {
   const scan = async (type: mediasType) => {
     console.log(`scan ${type}`);
-    const files = await fs.readdir(
-      type === "sounds" ? SOUNDS_PATH : VIDEOS_PATH
-    );
+    const paths: {
+      [key in mediasType]: string;
+    } = {
+      greenVideo: VIDEOS_PATH + "/" + GREEN_VIDEOS_FOLDER,
+      sounds: SOUNDS_PATH,
+      videos: VIDEOS_PATH + "/" + STANDARD_VIDEOS_FOLDER,
+    };
+    const files = await fs.readdir(paths[type]);
     console.log(`${type} found files`, files.length);
     medias[type] = files.map((fileName, i) => ({
       id: fileName.split(".").at(0)?.trim().toLowerCase() || i.toString(),
@@ -27,6 +38,7 @@ export async function initMedias() {
     }));
   };
   await scan("sounds").catch((e) => console.log(e));
+  await scan("greenVideo").catch((e) => console.log(e));
   await scan("videos").catch((e) => console.log(e));
 }
 export const MediaListener: CommandListener = async ({
@@ -35,19 +47,37 @@ export const MediaListener: CommandListener = async ({
   socket,
   chatClient,
   channel,
+  obs,
 }) => {
+  const emitVideo = async (filename: string, isGreen: boolean) => {
+    await obs.call("SetSourceFilterEnabled", {
+      sourceName: "mediaPlayer",
+      filterName: "fondVert",
+      filterEnabled: isGreen,
+    });
+    socket.emit(
+      "playVideo",
+      `/${isGreen ? GREEN_VIDEOS_FOLDER : STANDARD_VIDEOS_FOLDER}/${filename}`
+    );
+  };
   if (!command) return;
-  if (command === "random") {
+  if (command === "randomsound") {
     const isVideo = Math.random() > 0.5;
-    if (!isVideo) {
+    if (isVideo) {
+      const isGreen = Math.random() > 0.5;
+      if (isGreen) {
+        const random = pickRandomOne(medias.greenVideo);
+        await emitVideo(random.fileName, true);
+      } else {
+        const random = pickRandomOne(medias.videos);
+        await emitVideo(random.fileName, false);
+      }
+    } else {
       const random = pickRandomOne(medias.sounds);
       socket.emit("playSound", {
         fileName: random.fileName,
         times: 1,
       });
-    } else {
-      const random = pickRandomOne(medias.videos);
-      socket.emit("playVideo", random.fileName);
     }
     return;
   }
@@ -55,23 +85,25 @@ export const MediaListener: CommandListener = async ({
     return;
   }
   if (command === "help") {
-    chatClient.say(
+    await chatClient.say(
       channel,
-      "list des commandes: !tts !videos !sounds !hero !discord !sound(chaine avec un espace les sons sans !)"
+      "list des commandes:!randomvideo !randomsound !tts !videos !sounds !hero !discord !sound(chaine avec un espace les sons sans !)"
     );
     return;
   }
   if (command === "sounds") {
-    chatClient.say(
+    await chatClient.say(
       channel,
       `list des sounds: ${medias.sounds.map((m) => "!" + m.id).join(" ")}`
     );
     return;
   }
   if (command === "videos") {
-    chatClient.say(
+    await chatClient.say(
       channel,
-      `list des videos: ${medias.videos.map((m) => "!" + m.id).join(" ")}`
+      `list des videos: ${medias.videos
+        .map((m) => "!" + m.id)
+        .join(" ")} ${medias.greenVideo.map((m) => "!" + m.id).join(" ")}`
     );
     return;
   }
@@ -85,9 +117,7 @@ export const MediaListener: CommandListener = async ({
 
     return;
   }
-  const findSound = medias.sounds.find(({ id }) =>
-    id.startsWith(command.toLowerCase())
-  );
+  const findSound = medias.sounds.find(({ id }) => id === command);
   if (findSound) {
     let times = parseInt(args[0]);
     times = isNaN(times) ? 1 : times;
@@ -98,10 +128,12 @@ export const MediaListener: CommandListener = async ({
       times,
     });
   }
-  const findVideo = medias.videos.find(({ id }) =>
-    id.startsWith(command.toLowerCase())
-  );
+  const findVideo = medias.videos.find(({ id }) => id === command);
   if (findVideo) {
-    socket.emit("playVideo", findVideo.fileName);
+    await emitVideo(findVideo.fileName, false);
+  }
+  const findGreenVideo = medias.greenVideo.find(({ id }) => id === command);
+  if (findGreenVideo) {
+    await emitVideo(findGreenVideo.fileName, true);
   }
 };
