@@ -21,4 +21,5 @@ export type SpriteSheet = {
   animations: SpritesAnimation;
   width: number;
   height: number;
+  scale: number;
 };

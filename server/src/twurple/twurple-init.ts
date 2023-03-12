@@ -116,7 +116,7 @@ export async function TwurpleInit(): Promise<{
   const eventSub = new EventSubWsListener({ apiClient });
 
   const pubSubClient = new PubSubClient({ authProvider });
-
+  console.log("connected to twitch");
   return {
     eventSub,
     chatClient,

@@ -8,22 +8,34 @@ import {
   SocketData,
 } from "../../shared/src/shared-socket";
 import { HeroGame } from "./game/hero-game";
-import { HeroChat } from "./message-listeners/hero-chat";
-import { HeroStat } from "./message-listeners/hero-stat";
-import { MediaListener } from "./message-listeners/medias";
-import { TtsListener } from "./message-listeners/tts-listener";
+import { HeroChat } from "./command-listeners/hero-chat";
+import { HeroStat } from "./command-listeners/hero-stat";
+import { MediaListener } from "./command-listeners/medias";
+import { TtsListener } from "./command-listeners/tts-listener";
 import { HeroReward } from "./reward-listeners/heroes/hero-reward";
 import OBSWebSocket from "obs-websocket-js";
+import { CarroueRewardListener } from "./reward-listeners/carroue-reward-listener";
+import { CarroueListener } from "./command-listeners/carroue-listener";
 
 export const commandListeners: CommandListener[] = [
   HeroChat,
   TtsListener,
   HeroStat,
   MediaListener,
+  CarroueListener,
 ];
-export const rewardListeners: RewardListener[] = [HeroReward];
+export const rewardListeners: RewardListener[] = [
+  HeroReward,
+  CarroueRewardListener,
+];
 
 export type ServerSocket = Server<
+  ClientToServerEvents,
+  ServerToClientEvents,
+  InterServerEvents,
+  SocketData
+>;
+export type ClientSocket = Socket<
   ClientToServerEvents,
   ServerToClientEvents,
   InterServerEvents,

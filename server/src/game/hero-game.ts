@@ -37,12 +37,12 @@ const pointToStat = ({
 }: HeroStats): HeroStats => {
   // stats en fonction de la classe Choisi ( monk , guerrier, mage )
   return {
-    critic: NumberUtils.round(scaleHyperTangent(critic, 500, 60, 1), 100),
-    dodge: NumberUtils.round(scaleHyperTangent(dodge, 500, 60, 1), 100),
-    power: NumberUtils.round(scaleHyperTangent(power, 500, 100, 2), 1),
-    pv: NumberUtils.round(scaleHyperTangent(pv, 500, 400, 10), 1),
-    regen: NumberUtils.round(scaleHyperTangent(regen, 500, 40, 1), 1),
-    speed: NumberUtils.round(scaleHyperTangent(speed, 500, 200, 0), 1),
+    critic: NumberUtils.round(scaleHyperTangent(critic, 1000, 60, 1), 100),
+    dodge: NumberUtils.round(scaleHyperTangent(dodge, 1000, 60, 1), 100),
+    power: NumberUtils.round(scaleHyperTangent(power, 1000, 100, 2), 1),
+    pv: NumberUtils.round(scaleHyperTangent(pv, 1000, 400, 10), 1),
+    regen: NumberUtils.round(scaleHyperTangent(regen, 1000, 40, 1), 1),
+    speed: NumberUtils.round(scaleHyperTangent(speed, 1000, 200, 0), 1),
   };
 };
 
@@ -91,7 +91,9 @@ export class HeroGame {
   }
 
   getPlayerState(playerName: string): PlayerWithHeroStats | undefined {
-    return this.state.players.find((p) => p.name === playerName);
+    return this.state.players.find(
+      (p) => p.name.toLowerCase() === playerName.toLowerCase()
+    );
   }
 
   playerStateToString(playerName: string): string {
@@ -147,17 +149,15 @@ export class HeroGame {
     let winPoint = 1;
     if (levelDiff > 10) {
       return;
-    }
-    if (levelDiff < 0) {
+    } else if (levelDiff > 0) {
+      winPoint = 1;
+    } else if (levelDiff > -10 && levelDiff <= 0) {
       winPoint = 2;
-    }
-    if (levelDiff < 10) {
+    } else if (levelDiff > -20 && levelDiff <= -10) {
       winPoint = 3;
-    }
-    if (levelDiff < 20) {
+    } else if (levelDiff > -30 && levelDiff <= -20) {
       winPoint = 4;
-    }
-    if (levelDiff < 30) {
+    } else if (levelDiff > -40 && levelDiff <= -30) {
       winPoint = 5;
     }
     const rand = ArrayUtils.pickRandomOne<keyof HeroStats>([

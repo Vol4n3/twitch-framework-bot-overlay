@@ -1,5 +1,5 @@
-import { SpritesAnimation } from "../sprite-animation";
-import { rangeArray } from "./range";
+import { SpritesAnimation } from "./sprite-animation";
+import { rangeArray } from "../range";
 
 export const chevalierSpriteAnimations: SpritesAnimation = {
   walk: {

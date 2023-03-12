@@ -1,4 +1,4 @@
-import { SpritesAnimation } from "../sprite-animation";
+import { SpritesAnimation } from "./sprite-animation";
 
 export const aventurerSpriteAnimations: SpritesAnimation = {
   walk: {

@@ -10,13 +10,12 @@ import {
   SERVER_PORT,
   SOUNDS_PATH,
   STORAGE_FOLDER,
+  TWITCH_CHANNEL,
 } from "./configs";
-import { initMedias } from "./message-listeners/medias";
-import { HeroStats } from "../../shared/src/shared-game";
-import { ArrayUtils } from "jcv-ts-utils";
+import { initMedias } from "./command-listeners/medias";
 import { setTwitchCode, TwurpleInit } from "./twurple/twurple-init";
 import { ObsInit } from "./obs/obs-init";
-import { SpotifyInit } from "./spotify/spotify-init";
+import { socketListener } from "./socket/socket-listener";
 
 fs.mkdir(`./${STORAGE_FOLDER}`).catch(() => {});
 fs.mkdir(SOUNDS_PATH).catch(() => {});
@@ -43,89 +42,73 @@ const socket: ServerSocket = new Server(httpServer, {
   },
 });
 httpServer.listen(SERVER_PORT);
-
-const usersBlacklist = ["moobot", "b34rbot"].map((m) => m.toLowerCase());
 const gameInstance = new HeroGame();
 
-Promise.all([TwurpleInit(), ObsInit()]).then(async ([twurple, obs]) => {
-  const { apiClient, chatClient, pubSubClient, eventSub } = twurple;
-  const channelInfo = await apiClient.users.getUserById(BROADCASTER_ID);
+const usersBlacklist = ["moobot", "b34rbot"].map((m) => m.toLowerCase());
+Promise.all([TwurpleInit(), ObsInit()]).then(
+  async ([{ apiClient, chatClient, pubSubClient }, obs]) => {
+    await gameInstance.addPlayer("boss", "Boss");
+    socket.on("connection", (socket) => {
+      socketListener({ socket, gameInstance });
+    });
 
-  console.log("connected to twitch");
-
-  socket.on("connection", (socket) => {
-    console.log("a socket client is connected");
-    gameInstance.addPlayer("boss", "Boss").then(() => {
-      socket.emit("gameState", gameInstance.state);
-    });
-    socket.emit("gameState", gameInstance.state);
-    socket.on("disconnect", () => {
-      console.log("a socket client is disconnected");
-    });
-    socket.on("playerKill", (data) => {
-      gameInstance.playerKill(data.attacker, data.target);
-      /* chatClient.say(
-              TWITCH_CHANNEL,
-              `${data.attacker.name} a mis ko  ${data.target.name} et gagne 1 point de ${rand}`
-            );*/
-    });
-  });
-  pubSubClient.onRedemption(BROADCASTER_ID, async (message) => {
-    console.log(message.channelId);
-    rewardListeners.forEach((cb) => {
-      cb({
-        channel: channelInfo?.name || message.channelId,
-        user: message.userName,
-        rewardTitle: message.rewardTitle,
-        userId: message.userId,
-        message: message.message,
-        gameInstance,
-        chatClient,
-        apiClient,
-        socket,
-        obs,
-      });
-    });
-  });
-  chatClient.onMessage(
-    async (
-      channel: string,
-      user: string,
-      text: string,
-      meta: PrivateMessage
-    ) => {
-      if (usersBlacklist.includes(user.toLowerCase())) return;
-      const extractEmotes = meta
-        .parseEmotes()
-        .map((p) => (p.type === "text" ? p.text : ""));
-      const parsedText = extractEmotes.join(" ");
-      const [first, ...args] = parsedText.split(" ");
-      let command = first.startsWith("!")
-        ? first.replace(/!/g, "").toLowerCase()
-        : "";
-
-      command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-      for (let i = 0; i < commandListeners.length; i++) {
-        const cancelNext = await commandListeners[i]({
-          channel,
-          user,
-          rawText: text,
-          command,
-          meta,
-          parsedText,
-          args,
+    pubSubClient.onRedemption(BROADCASTER_ID, async (message) => {
+      console.log(message.channelId);
+      rewardListeners.forEach((cb) => {
+        cb({
+          channel: TWITCH_CHANNEL,
+          user: message.userName,
+          rewardTitle: message.rewardTitle,
+          userId: message.userId,
+          message: message.message,
+          gameInstance,
           chatClient,
           apiClient,
-          userId: meta.userInfo.userId,
-          gameInstance,
           socket,
           obs,
         });
-        if (cancelNext) break;
+      });
+    });
+    chatClient.onMessage(
+      async (
+        channel: string,
+        user: string,
+        text: string,
+        meta: PrivateMessage
+      ) => {
+        if (usersBlacklist.includes(user.toLowerCase())) return;
+        const extractEmotes = meta
+          .parseEmotes()
+          .map((p) => (p.type === "text" ? p.text : ""));
+        const parsedText = extractEmotes.join(" ");
+        const [first, ...args] = parsedText.split(" ");
+        let command = first.startsWith("!")
+          ? first.replace(/!/g, "").toLowerCase()
+          : "";
+
+        command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        for (let i = 0; i < commandListeners.length; i++) {
+          const cancelNext = await commandListeners[i]({
+            channel,
+            user,
+            rawText: text,
+            command,
+            meta,
+            parsedText,
+            args,
+            chatClient,
+            apiClient,
+            userId: meta.userInfo.userId,
+            gameInstance,
+            socket,
+            obs,
+          });
+          if (cancelNext) break;
+        }
       }
-    }
-  );
-});
+    );
+  }
+);
 
 [
   "SIGHUP",

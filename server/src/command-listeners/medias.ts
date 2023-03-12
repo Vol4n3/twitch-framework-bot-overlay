@@ -5,6 +5,7 @@ import {
   GREEN_VIDEOS_FOLDER,
   STANDARD_VIDEOS_FOLDER,
   VIDEOS_PATH,
+  TWITCH_CHANNEL,
 } from "../configs";
 import { ArrayUtils } from "jcv-ts-utils";
 import pickRandomOne = ArrayUtils.pickRandomOne;
@@ -48,6 +49,7 @@ export const MediaListener: CommandListener = async ({
   chatClient,
   channel,
   obs,
+  user,
 }) => {
   const emitVideo = async (filename: string, isGreen: boolean) => {
     await obs.call("SetSourceFilterEnabled", {
@@ -61,6 +63,7 @@ export const MediaListener: CommandListener = async ({
     );
   };
   if (!command) return;
+
   if (command === "randomsound") {
     const isVideo = Math.random() > 0.5;
     if (isVideo) {
@@ -84,7 +87,7 @@ export const MediaListener: CommandListener = async ({
   if (command === "randomvideo") {
     return;
   }
-  if (command === "help") {
+  if (command === "help" || command === "commands") {
     await chatClient.say(
       channel,
       "list des commandes:!randomvideo !randomsound !tts !videos !sounds !hero !discord !sound(chaine avec un espace les sons sans !)"

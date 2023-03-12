@@ -8,7 +8,8 @@ export interface ServerToClientEvents {
   playSound: (data: soundOption) => void;
   playMultipleSound: (data: string[]) => void;
   playVideo: (data: string) => void;
-
+  showCarroue: (data: boolean) => void;
+  launchCarroue: () => void;
   chatMessage: (data: { message: string; user: string }) => void;
 }
 

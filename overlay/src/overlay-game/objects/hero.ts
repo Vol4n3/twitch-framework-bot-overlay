@@ -7,23 +7,48 @@ import {
   Scene2d,
 } from "jcv-ts-utils";
 import { PlayerWithHeroStats } from "../../../../shared/src/shared-game";
+import {
+  AnimationName,
+  SpriteSheet,
+} from "../animation/sprites/sprite-animation";
 import Point2 = Point.Point2;
-import { AnimationName, SpriteSheet } from "./sprite-animation";
 
 export class Hero implements Item2Scene {
   isUpdated: boolean = true;
   scenePriority: number = 0;
   velocity: Point2 = { x: 0, y: 0 };
-
-  scale: number = 4;
   width: number = 0;
   height: number = 0;
   animationName: AnimationName = "walk";
   grounded: boolean = false;
   lastAttack: Hero | null = null;
+  floatingMessage: {
+    text: string;
+    delay: number;
+    elevation: number;
+    color: string;
+    size: number;
+  } | null = null;
+  public onDie: ((killer: Hero) => void) | undefined;
   private messageBox: HTMLElement | null = null;
   private frameCount = 0;
   private health: number;
+
+  constructor(
+    private _player: PlayerWithHeroStats,
+    public position: Point2 = { x: 200, y: 0 },
+    private container: HTMLElement,
+    private spriteSheet: SpriteSheet
+  ) {
+    this.width = spriteSheet.width * spriteSheet.scale;
+    this.height = spriteSheet.height * spriteSheet.scale;
+    this.health = _player.heroStats.pv;
+    this.move();
+  }
+
+  get player() {
+    return this._player;
+  }
 
   set player(p: PlayerWithHeroStats) {
     this._player = p;
@@ -34,20 +59,7 @@ export class Hero implements Item2Scene {
       y: this.velocity.y,
     };
   }
-  get player() {
-    return this._player;
-  }
-  constructor(
-    private _player: PlayerWithHeroStats,
-    public position: Point2 = { x: 200, y: 0 },
-    private container: HTMLElement,
-    private spriteSheet: SpriteSheet
-  ) {
-    this.width = spriteSheet.width * this.scale;
-    this.height = spriteSheet.height * this.scale;
-    this.health = _player.heroStats.pv;
-    this.move();
-  }
+
   move() {
     const direction = Math.random() > 0.5 ? 1 : -1;
     this.velocity = {
@@ -55,10 +67,12 @@ export class Hero implements Item2Scene {
       y: 0,
     };
   }
+
   stop() {
-    const direction = Math.random() > 0.5 ? 0 : -0;
+    const direction = Math.random() > 0.5 ? 0.01 : -0.01;
     this.velocity = { x: direction, y: 0 };
   }
+
   getRect(): Rectangle.Rectangle2 {
     return {
       x: this.position.x + this.width / 2,
@@ -67,13 +81,7 @@ export class Hero implements Item2Scene {
       h: this.height,
     };
   }
-  floatingMessage: {
-    text: string;
-    delay: number;
-    elevation: number;
-    color: string;
-    size: number;
-  } | null = null;
+
   draw2d(scene: Scene2d): void {
     const { ctx } = scene;
     const { x, y } = this.position;
@@ -107,7 +115,7 @@ export class Hero implements Item2Scene {
       x: this.width / 2,
       y: -10,
       text: `${this._player.name}
-      lvl${this._player.level} - ${this.health}❤️‍🔥`,
+      lvl${this._player.level} | ${this.health}❤️‍🔥`,
       textAlign: "center",
       strokeStyle: "black",
       lineWidth: 0.5,
@@ -161,6 +169,7 @@ export class Hero implements Item2Scene {
       time: 10,
     });
   }
+
   isWander() {
     return (
       this.animationName === "run" ||
@@ -168,6 +177,7 @@ export class Hero implements Item2Scene {
       this.animationName === "walk"
     );
   }
+
   update(scene: Scene2d, count: number): void {
     const { height, width } = scene;
     this.isUpdated = true;
@@ -210,7 +220,10 @@ export class Hero implements Item2Scene {
       }
       return;
     }
-    this.position = Point.operation("add", this.position, this.velocity);
+    if (Math.abs(this.velocity.x) > 0.01) {
+      this.position.x += this.velocity.x;
+    }
+    this.position.y += this.velocity.y;
     const limitGround = height - this.height;
     if (!this.grounded) {
       if (this.position.y >= limitGround) {
@@ -233,7 +246,7 @@ export class Hero implements Item2Scene {
       if (this.isWander()) {
         if (Math.abs(this.velocity.x) > 4) {
           this.setAnimation("run");
-        } else if (this.velocity.x === 0) {
+        } else if (Math.abs(this.velocity.x) <= 0.1) {
           this.setAnimation("idle");
         } else {
           this.setAnimation("walk");
@@ -303,7 +316,7 @@ export class Hero implements Item2Scene {
       this.grounded = false;
     }, 400);
   }
-  public onDie: ((killer: Hero) => void) | undefined;
+
   attack(target: Hero): boolean {
     if (this.health <= 0) return false;
     if (this.animationName !== "run" && this.animationName !== "walk")

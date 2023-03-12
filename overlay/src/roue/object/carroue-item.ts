@@ -2,7 +2,6 @@ import { NumberUtils, Scene2d } from "jcv-ts-utils";
 import { Item2Scene } from "jcv-ts-utils/dist/geometry/scene2d";
 import angleRangeLoop = NumberUtils.angleRangeLoop;
 import rangeLoop = NumberUtils.rangeLoop;
-import PI = NumberUtils.PI;
 import PI2 = NumberUtils.PI2;
 function randomNumber() {
   return Math.round(Math.random() * 155) + 100;
@@ -11,36 +10,54 @@ function randomNumber() {
 function randomColor() {
   return `rgb(${randomNumber()} , ${randomNumber()} , ${randomNumber()})`;
 }
-export type Choice = { name: string; color: string };
+export type Choice = { name: string; color: string; id: string };
+
 export const choices: Choice[] = [
-  { name: "Relance la carroue", color: randomColor() },
-  { name: "Fais 10 Pompes", color: randomColor() },
-  { name: "Vip une semaine", color: randomColor() },
-  { name: "Karaoké", color: randomColor() },
-  { name: "Ajoute un défi à la roue", color: randomColor() },
-  { name: "Perdu !", color: randomColor() },
-  { name: "Fais une Grimace", color: randomColor() },
-  { name: "Raconte un blague", color: randomColor() },
-  { name: "Un an de loyer", color: randomColor() },
-  { name: "Un an de facture d'électricité", color: randomColor() },
-  { name: "Battle Royal", color: randomColor() },
-  /*  { name: "7", color: randomColor() },
-    { name: "8", color: randomColor() },
-    { name: "9", color: randomColor() },
-    { name: "10", color: randomColor() },
-    { name: "11", color: randomColor() },*/
+  { id: "relance", name: "Relance la carroue", color: randomColor() },
+  { id: "pompe", name: "10 Pompes !", color: randomColor() },
+  { id: "burpee", name: "3 Burpees !", color: randomColor() },
+  { id: "vip", name: "Vip une semaine", color: randomColor() },
+  { id: "karaoke", name: "Karaoké", color: randomColor() },
+  {
+    id: "addChoice",
+    name: "Ajoute un défi à la carroue",
+    color: randomColor(),
+  },
+  { id: "loose", name: "Perdu !", color: randomColor() },
+  { id: "grimace", name: "une Grimace", color: randomColor() },
+  { id: "blague", name: "Raconte un blague", color: randomColor() },
+  { id: "squat", name: "20 squats", color: randomColor() },
+  { id: "giveOther", name: "File la roue à quelqu'un", color: randomColor() },
+  { id: "battleRoyal", name: "Battle Royal", color: randomColor() },
+  {
+    id: "refund",
+    name: "Rembourse les points de chaines",
+    color: randomColor(),
+  },
 ];
+const quarterSize = PI2 / choices.length;
 export class Carroue implements Item2Scene {
+  get show(): boolean {
+    return this._show;
+  }
+
+  set show(value: boolean) {
+    this.isUpdated = true;
+    this._show = value;
+  }
   isUpdated: boolean = true;
   scenePriority: number = 0;
   radius: number = 1000;
-
   rotation: number = Math.random() * PI2;
   rotationSpeed: number = 0;
   onStop: ((choice: Choice) => void) | null = null;
+  previousIndex: number | null = null;
+  onIndexChange: (() => void) | null = null;
   constructor(public x: number = 0, public y: number = 0) {}
+  private _show: boolean = false;
 
   draw2d(scene: Scene2d): void {
+    if (!this._show) return;
     const { ctx } = scene;
     ctx.translate(this.x, this.y);
     ctx.save(); // save for rotation
@@ -51,7 +68,7 @@ export class Carroue implements Item2Scene {
     ctx.clip();
 
     ctx.globalAlpha = 0.8;
-    const quarterSize = (PI * 2) / choices.length;
+
     for (let i = 0; i < choices.length; i++) {
       const choice = choices[i];
       if (!choice) continue;
@@ -78,7 +95,7 @@ export class Carroue implements Item2Scene {
         fillStyle: "black",
         strokeStyle: "black",
         font: {
-          size: 40,
+          size: 32,
           type: "Helvetica",
         },
 
@@ -120,18 +137,21 @@ export class Carroue implements Item2Scene {
     this.isUpdated = true;
     this.rotation += this.rotationSpeed;
     this.rotation = angleRangeLoop(this.rotation);
-
+    const positiveAngle = (this.rotation + PI2) / 2;
+    const indexChoice: number =
+      choices.length -
+      1 -
+      Math.floor(
+        rangeLoop(0, positiveAngle / (quarterSize / 2), choices.length)
+      );
+    if (indexChoice !== this.previousIndex && this.onIndexChange) {
+      this.onIndexChange();
+    }
+    this.previousIndex = indexChoice;
     if (this.rotationSpeed > 0.0001 && Math.random() > 0.6) {
       this.rotationSpeed *= 0.992;
       if (this.rotationSpeed <= 0.0005) {
         this.rotationSpeed = 0;
-        const positiveAngle = (this.rotation + PI2) / 2;
-        const quarterSize = PI2 / choices.length / 2;
-        const indexChoice: number =
-          choices.length -
-          1 -
-          Math.floor(rangeLoop(0, positiveAngle / quarterSize, choices.length));
-
         if (this.onStop) this.onStop(choices[indexChoice]);
       }
     }

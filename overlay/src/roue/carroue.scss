@@ -1,0 +1,15 @@
+.carroueResult{
+  position: absolute;
+  border: 10px black solid;
+  top: calc(50vh - 60px);
+  font-family: Helvetica, serif;
+  font-size: 50px;
+  font-weight: 800;
+  padding: 10px 40px;
+  left: 800px;
+  scale: 0;
+  &.active{
+    transition: scale 3s ease-in-out;
+    scale: 1;
+  }
+}

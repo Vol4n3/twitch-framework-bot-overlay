@@ -5,43 +5,12 @@ import {
   ClientToServerEvents,
   ServerToClientEvents,
 } from "../../../shared/src/shared-socket";
-import { Intersection, loadImage, Scene2d } from "jcv-ts-utils";
+import { Intersection, Scene2d } from "jcv-ts-utils";
 import { Hero } from "./objects/hero";
-import { HeroSkin } from "../../../shared/src/shared-game";
-import { SpriteSheet } from "./objects/sprite-animation";
-import { aventurerSpriteAnimations } from "./objects/animation/adventurer-sprite";
-import { chevalierSpriteAnimations } from "./objects/animation/chevalier-sprite";
+import { buildSpriteSheet } from "./animation/sprite-builder";
 
 const { VITE_SERVER_ADDRESS, VITE_BROADCAST_ID } = import.meta.env;
-const buildSpriteSheet = async (): Promise<{
-  [key in HeroSkin]: SpriteSheet;
-}> => {
-  const [adventurer, blueAdventurer, chevalier] = await Promise.all([
-    loadImage("/assets/img/adventurer-sheet.png"),
-    loadImage("/assets/img/adventurer-sheet-blue.png"),
-    loadImage("/assets/img/chevalier-sheet.png"),
-  ]);
-  return {
-    adventurer: {
-      image: adventurer,
-      animations: aventurerSpriteAnimations,
-      width: 50,
-      height: 37,
-    },
-    blueAdventurer: {
-      image: blueAdventurer,
-      animations: aventurerSpriteAnimations,
-      width: 50,
-      height: 37,
-    },
-    chevalier: {
-      image: chevalier,
-      animations: chevalierSpriteAnimations,
-      width: 128,
-      height: 64,
-    },
-  };
-};
+
 const init = async () => {
   const container = document.getElementById("scene");
   if (!container) return;

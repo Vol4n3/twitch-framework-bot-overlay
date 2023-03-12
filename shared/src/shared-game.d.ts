@@ -6,7 +6,13 @@ export interface HeroStats {
   critic: number;
   regen: number;
 }
-export type HeroSkin = "adventurer" | "blueAdventurer" | "chevalier";
+export type HeroSkin =
+  | "adventurer"
+  | "blueAdventurer"
+  | "chevalier"
+  | "pimouki"
+  | "kikiks"
+  | "icecoptered";
 export interface Player {
   id: string;
   name: string;
