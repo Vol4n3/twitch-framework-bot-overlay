@@ -1,7 +1,7 @@
 import { RewardListener } from "../listeners";
 import { setCarroueHolder } from "../carroue-holder";
 
-export const CarroueRewardListener: RewardListener = async function ({
+export const CarroueReward: RewardListener = async function ({
   rewardTitle,
   socket,
   user,

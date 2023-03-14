@@ -12,10 +12,11 @@ import {
   STORAGE_FOLDER,
   TWITCH_CHANNEL,
 } from "./configs";
-import { initMedias } from "./command-listeners/medias";
+import { initMedias } from "./command-listeners/medias-commands";
 import { setTwitchCode, TwurpleInit } from "./twurple/twurple-init";
 import { ObsInit } from "./obs/obs-init";
-import { socketListener } from "./socket/socket-listener";
+import { socketClients } from "./socket/socket-clients";
+import { setSpotifyCode, SpotifyInit } from "./spotify/spotify-init";
 
 fs.mkdir(`./${STORAGE_FOLDER}`).catch(() => {});
 fs.mkdir(SOUNDS_PATH).catch(() => {});
@@ -30,7 +31,13 @@ yesterday.setDate(yesterday.getDate() - 1);
 const httpServer = createServer((req, res) => {
   const url = new URL(`${SERVER_ADDRESS}${req.url || "/"}`);
   const searchCode = url.searchParams.get("code");
-  if (searchCode) setTwitchCode(searchCode);
+  if (req.url && req.url.startsWith("/twurple")) {
+    if (searchCode) setTwitchCode(searchCode);
+  }
+  if (req.url && req.url.startsWith("/spotify")) {
+    if (searchCode) setSpotifyCode(searchCode);
+  }
+
   res.setHeader("Content-Type", "application/json");
   res.writeHead(200);
   res.end(`{"message": "ok"}`);
@@ -45,11 +52,11 @@ httpServer.listen(SERVER_PORT);
 const gameInstance = new HeroGame();
 
 const usersBlacklist = ["moobot", "b34rbot"].map((m) => m.toLowerCase());
-Promise.all([TwurpleInit(), ObsInit()]).then(
-  async ([{ apiClient, chatClient, pubSubClient }, obs]) => {
+Promise.all([TwurpleInit(), ObsInit(), SpotifyInit()]).then(
+  async ([{ apiClient, chatClient, pubSubClient }, obs, spotify]) => {
     await gameInstance.addPlayer("boss", "Boss");
     socket.on("connection", (socket) => {
-      socketListener({ socket, gameInstance });
+      socketClients({ socket, gameInstance });
     });
 
     pubSubClient.onRedemption(BROADCASTER_ID, async (message) => {
@@ -66,6 +73,7 @@ Promise.all([TwurpleInit(), ObsInit()]).then(
           apiClient,
           socket,
           obs,
+          spotify,
         });
       });
     });
@@ -102,6 +110,7 @@ Promise.all([TwurpleInit(), ObsInit()]).then(
             gameInstance,
             socket,
             obs,
+            spotify,
           });
           if (cancelNext) break;
         }

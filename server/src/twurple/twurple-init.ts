@@ -28,13 +28,15 @@ const getTwitchCode = () =>
   });
 async function getToken(): Promise<AccessToken> {
   return JSON.parse(
-    await fs.readFile(`./${STORAGE_FOLDER}/tokens.json`, { encoding: "utf-8" })
+    await fs.readFile(`./${STORAGE_FOLDER}/twurple_token.json`, {
+      encoding: "utf-8",
+    })
   );
 }
 
 async function saveToken(token: AccessToken) {
   return await fs.writeFile(
-    `./${STORAGE_FOLDER}/tokens.json`,
+    `./${STORAGE_FOLDER}/twurple_token.json`,
     JSON.stringify(token, null, 4),
     "utf-8"
   );
@@ -61,7 +63,7 @@ export async function TwurpleInit(): Promise<{
     await open(
       "https://id.twitch.tv/oauth2/authorize?" +
         `client_id=${TWITCH_CLIENT}&` +
-        `redirect_uri=${SERVER_ADDRESS}&` +
+        `redirect_uri=${SERVER_ADDRESS}/twurple&` +
         "response_type=code&" +
         "scope=" +
         "chat:read+" +
@@ -76,7 +78,7 @@ export async function TwurpleInit(): Promise<{
         "channel:manage:vips+" +
         "channel:read:redemptions"
     );
-    console.log("waiting for authentification");
+    console.log("waiting for twitch authentification");
     const code = await getTwitchCode();
     const response = await fetch(
       "https://id.twitch.tv/oauth2/token?" +
@@ -84,7 +86,7 @@ export async function TwurpleInit(): Promise<{
         `client_secret=${TWITCH_SECRET}&` +
         `code=${code}&` +
         "grant_type=authorization_code&" +
-        `redirect_uri=${SERVER_ADDRESS}`,
+        `redirect_uri=${SERVER_ADDRESS}/twurple`,
       { method: "POST" }
     );
     const responseToken = (await response.json()) as {

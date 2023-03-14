@@ -8,26 +8,27 @@ import {
   SocketData,
 } from "../../shared/src/shared-socket";
 import { HeroGame } from "./game/hero-game";
-import { HeroChat } from "./command-listeners/hero-chat";
-import { HeroStat } from "./command-listeners/hero-stat";
-import { MediaListener } from "./command-listeners/medias";
-import { TtsListener } from "./command-listeners/tts-listener";
-import { HeroReward } from "./reward-listeners/heroes/hero-reward";
+import { HeroCommands } from "./command-listeners/hero-commands";
+
+import { MediaCommands } from "./command-listeners/medias-commands";
+import { TtsCommands } from "./command-listeners/tts-commands";
+import { HeroReward } from "./reward-listeners/hero-reward";
 import OBSWebSocket from "obs-websocket-js";
-import { CarroueRewardListener } from "./reward-listeners/carroue-reward-listener";
-import { CarroueListener } from "./command-listeners/carroue-listener";
+import { CarroueReward } from "./reward-listeners/carroue-reward";
+import { CarroueCommands } from "./command-listeners/carroue-commands";
+import { SpotifyInstance } from "./spotify/spotify-types";
+import { SpotifyCommands } from "./command-listeners/spotify-commands";
+import { HelpCommands } from "./command-listeners/help-commands";
 
 export const commandListeners: CommandListener[] = [
-  HeroChat,
-  TtsListener,
-  HeroStat,
-  MediaListener,
-  CarroueListener,
+  HelpCommands,
+  HeroCommands,
+  TtsCommands,
+  MediaCommands,
+  CarroueCommands,
+  SpotifyCommands,
 ];
-export const rewardListeners: RewardListener[] = [
-  HeroReward,
-  CarroueRewardListener,
-];
+export const rewardListeners: RewardListener[] = [HeroReward, CarroueReward];
 
 export type ServerSocket = Server<
   ClientToServerEvents,
@@ -55,6 +56,7 @@ export type CommandListener = (data: {
   gameInstance: HeroGame;
   socket: ServerSocket;
   obs: OBSWebSocket;
+  spotify: SpotifyInstance;
 }) => Promise<void | boolean>;
 
 export type RewardListener = (data: {
@@ -68,4 +70,5 @@ export type RewardListener = (data: {
   apiClient: ApiClient;
   socket: ServerSocket;
   obs: OBSWebSocket;
+  spotify: SpotifyInstance;
 }) => void;

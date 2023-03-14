@@ -2,7 +2,7 @@ import { CommandListener } from "../listeners";
 import { TWITCH_CHANNEL } from "../configs";
 import { carroueHolder, setCarroueHolder } from "../carroue-holder";
 
-export const CarroueListener: CommandListener = async ({
+export const CarroueCommands: CommandListener = async ({
   command,
   socket,
   user,

@@ -18,6 +18,12 @@ and edit these files for config app
 you can find clientID and secret when making application on
 https://dev.twitch.tv/console
 
+add uri redirect whitelist http://localhost:8085/twurple
+
+for spotify clientId and secret by making app on https://developer.spotify.com/dashboard/login
+
+add uri redirect whitelist http://localhost:8085/spotify
+
 ## launch
 
 launch server `cd ./server && yarn install && yarn server`

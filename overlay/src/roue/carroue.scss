@@ -8,8 +8,10 @@
   padding: 10px 40px;
   left: 800px;
   scale: 0;
+  opacity: 0;
   &.active{
-    transition: scale 3s ease-in-out;
+    transition: scale 3s ease-in-out, opacity 600ms ease-in-out;
     scale: 1;
+    opacity: 1;
   }
 }

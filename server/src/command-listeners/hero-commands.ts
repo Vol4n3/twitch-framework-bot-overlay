@@ -1,11 +1,15 @@
 import { CommandListener } from "../listeners";
 
-export const HeroChat: CommandListener = async ({
+export const HeroCommands: CommandListener = async ({
   user,
   gameInstance,
   userId,
   socket,
   rawText,
+  command,
+  chatClient,
+  channel,
+  args,
 }) => {
   // on speak in chat , player join the game
   await gameInstance.addPlayer(userId, user);
@@ -13,4 +17,12 @@ export const HeroChat: CommandListener = async ({
   socket.emit("gameState", gameInstance.state);
   // send socket when message wrote
   socket.emit("chatMessage", { user, message: rawText });
+  if (command === "hero") {
+    // await gameInstance.addPlayer(userId, user);
+    const name = args[0] || user;
+    const message: string = gameInstance.playerStateToString(name);
+    if (!message) return;
+    console.log(channel);
+    await chatClient.say(channel, message);
+  }
 };

@@ -1,5 +1,5 @@
-import { RewardListener } from "../../listeners";
-import { HeroStats } from "../../../../shared/src/shared-game";
+import { RewardListener } from "../listeners";
+import { HeroStats } from "../../../shared/src/shared-game";
 
 export const HeroReward: RewardListener = async ({
   rewardTitle,
@@ -7,7 +7,6 @@ export const HeroReward: RewardListener = async ({
   userId,
   gameInstance,
   chatClient,
-
   channel,
   socket,
 }) => {

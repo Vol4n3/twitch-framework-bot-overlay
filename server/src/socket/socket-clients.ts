@@ -1,7 +1,7 @@
 import { ClientSocket } from "../listeners";
 import { HeroGame } from "../game/hero-game";
 
-export function socketListener({
+export function socketClients({
   socket,
   gameInstance,
 }: {

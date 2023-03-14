@@ -11,8 +11,6 @@ const { VITE_SERVER_ADDRESS } = import.meta.env;
 const container = document.getElementById("scene");
 const carroueResult = document.createElement("div");
 carroueResult.className = "carroueResult";
-
-carroueResult.textContent = "test";
 if (container) {
   const scene = new Scene2d(container);
   const roue = new Carroue(0, scene.height / 2);
@@ -27,6 +25,7 @@ if (container) {
   roue.onIndexChange = async () => {
     const audio = new Audio(`/assets/audio/click.mp3`);
     audio.playbackRate = 2;
+    audio.volume = 0.1;
     await audio.play();
   };
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
