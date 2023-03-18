@@ -6,12 +6,12 @@ import {
   ServerToClientEvents,
 } from "../../../shared/src/shared-socket";
 const { VITE_SERVER_ADDRESS } = import.meta.env;
-
+// !sound omaewa nani yooo uwu
 const playSound = async (fileName: string) => {
   const audio = new Audio(`/sounds/${fileName}`);
   await audio.play();
   await new Promise((resolve) =>
-    setTimeout(resolve, audio.duration * 1000 * 0.5)
+    setTimeout(resolve, audio.duration * 1000 * 0.8)
   );
 };
 const mediaContainer = document.getElementById(

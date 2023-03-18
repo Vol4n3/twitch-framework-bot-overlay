@@ -9,11 +9,11 @@ export const CarroueCommands: CommandListener = async ({
   rawText,
 }) => {
   if (command === "hideroue") {
-    if (user.toLowerCase() === TWITCH_CHANNEL.toLowerCase()) {
+    if (user === TWITCH_CHANNEL.toLowerCase()) {
       socket.emit("showCarroue", false);
     }
   }
-  if (carroueHolder && user.toLowerCase() === carroueHolder.name) {
+  if (carroueHolder && user === carroueHolder.name) {
     const lower = rawText.toLowerCase();
     if (
       lower.includes("t") &&
@@ -24,7 +24,7 @@ export const CarroueCommands: CommandListener = async ({
       lower.includes("e")
     ) {
       socket.emit("launchCarroue");
-      setCarroueHolder("user", true);
+      setCarroueHolder(user, true);
     }
   }
 };

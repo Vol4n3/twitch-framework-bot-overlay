@@ -5,24 +5,24 @@
   "license": "MIT",
   "scripts": {
     "server": "tsc && node ./dist/index.js",
+    "bot-create-token": "tsc && node ./dist/bot-create-token.js",
+    "broadcaster-create-token": "tsc && node ./dist/broadcaster-create-token.js",
     "watch": "tsc --watch"
   },
   "devDependencies": {
-    "@twurple/api": "^6.0.8",
-    "@twurple/auth": "^6.0.8",
-    "@twurple/chat": "^6.0.8",
-    "@twurple/eventsub-ws": "^6.0.8",
-    "@twurple/pubsub": "^6.0.8",
-    "@types/node": "^18.15.1",
+    "@twurple/api": "^6.0.9",
+    "@twurple/auth": "^6.0.9",
+    "@twurple/chat": "^6.0.9",
+    "@twurple/eventsub-ws": "^6.0.9",
+    "@twurple/pubsub": "^6.0.9",
+    "@types/node": "^18.15.3",
     "dotenv": "^16.0.3",
+    "express": "^4.18.2",
     "jcv-ts-utils": "^1.1.7",
-    "npm-run-all": "^4.1.5",
+    "obs-websocket-js": "^5.0.2",
     "open": "^8.4.2",
     "socket.io": "^4.6.1",
-    "typescript": "^4.9.5",
-    "obs-websocket-js": "^5.0.2",
-    "express": "^4.18.2"
+    "typescript": "^4.9.5"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

@@ -91,9 +91,7 @@ export class HeroGame {
   }
 
   getPlayerState(playerName: string): PlayerWithHeroStats | undefined {
-    return this.state.players.find(
-      (p) => p.name.toLowerCase() === playerName.toLowerCase()
-    );
+    return this.state.players.find((p) => p.name === playerName);
   }
 
   playerStateToString(playerName: string): string {

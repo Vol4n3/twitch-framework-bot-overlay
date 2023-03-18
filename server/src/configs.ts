@@ -3,13 +3,15 @@ import { config as DotEnvConfig } from "dotenv";
 DotEnvConfig();
 
 const {
-  TWITCH_SECRET = "config it in .env",
-  TWITCH_CLIENT = "config it in .env",
+  TWITCH_BROADCASTER_SECRET = "config it in .env",
+  TWITCH_BROADCASTER_CLIENT = "config it in .env",
+  TWITCH_BROADCASTER_ID = "config it in .env",
+  TWITCH_BOT_SECRET = "config it in .env",
+  TWITCH_BOT_CLIENT = "config it in .env",
   TWITCH_BOT_ID = "config it in .env",
   TWITCH_CHANNEL = "config it in .env",
   OBS_SOCKET_PORT = "config it in .env",
   OBS_SOCKET_PASSWORD = "config it in .env",
-  BROADCASTER_ID = "config it in .env",
   SERVER_ADDRESS = "config it in .env",
   SERVER_PORT = "config it in .env",
   SOUNDS_PATH = "config it in .env",
@@ -22,11 +24,13 @@ const {
 } = process.env;
 
 export {
-  TWITCH_SECRET,
-  TWITCH_CLIENT,
-  TWITCH_CHANNEL,
+  TWITCH_BROADCASTER_SECRET,
+  TWITCH_BROADCASTER_CLIENT,
+  TWITCH_BROADCASTER_ID,
+  TWITCH_BOT_SECRET,
+  TWITCH_BOT_CLIENT,
   TWITCH_BOT_ID,
-  BROADCASTER_ID,
+  TWITCH_CHANNEL,
   OBS_SOCKET_PORT,
   OBS_SOCKET_PASSWORD,
   SERVER_ADDRESS,

@@ -26,6 +26,7 @@ export const SpotifyCommands: CommandListener = async ({
       chatClient.say(channel, "Impossible de skip , désolé :/");
     });
   }
+
   if (command === "song") {
     const response = await spotify.getCurrentPlay().catch(() => {
       chatClient.say(
