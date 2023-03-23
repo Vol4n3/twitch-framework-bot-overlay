@@ -61,11 +61,25 @@ export class HeroGame {
   players: Player[] = [];
   constructor() {}
 
-  get state(): GameData<PlayerWithHeroStats> {
+  getState(
+    filter: (player: Player) => boolean = () => true,
+    whitNoPoint: boolean = false
+  ): GameData<PlayerWithHeroStats> {
     return {
-      players: this.players.map((p) => ({
+      players: this.players.filter(filter).map((p) => ({
         ...p,
-        heroStats: pointToStat(p.points),
+        heroStats: pointToStat(
+          whitNoPoint
+            ? {
+                pv: 100,
+                power: 20,
+                speed: 400,
+                dodge: 200,
+                regen: 10,
+                critic: 200,
+              }
+            : p.points
+        ),
         level: calcLvl(p.points),
       })),
     };
@@ -91,7 +105,7 @@ export class HeroGame {
   }
 
   getPlayerState(playerName: string): PlayerWithHeroStats | undefined {
-    return this.state.players.find((p) => p.name === playerName);
+    return this.getState().players.find((p) => p.name === playerName);
   }
 
   playerStateToString(playerName: string): string {
@@ -137,7 +151,10 @@ export class HeroGame {
     return this.saveGame();
   }
 
-  async playerKill(attacker: PlayerWithHeroStats, target: PlayerWithHeroStats) {
+  async playerKill(
+    attacker: PlayerWithHeroStats,
+    target: PlayerWithHeroStats
+  ): Promise<undefined | { point: number; stat: keyof HeroStats }> {
     const attackerState = this.getPlayerState(attacker.name);
     const targetState = this.getPlayerState(target.name);
     if (!attackerState || !targetState) {
@@ -167,5 +184,6 @@ export class HeroGame {
       "speed",
     ]);
     await this.addPoint(attacker.name, rand, winPoint);
+    return { point: winPoint, stat: rand };
   }
 }

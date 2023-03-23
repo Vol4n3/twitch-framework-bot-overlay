@@ -41,6 +41,7 @@ if (container) {
       roue.show = value;
     });
     socket.on("launchCarroue", () => {
+      roue.show = true;
       roue.launch();
     });
   });

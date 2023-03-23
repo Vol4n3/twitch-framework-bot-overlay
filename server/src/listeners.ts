@@ -19,6 +19,7 @@ import { CarroueCommands } from "./command-listeners/carroue-commands";
 import { SpotifyInstance } from "./spotify/spotify-types";
 import { SpotifyCommands } from "./command-listeners/spotify-commands";
 import { HelpCommands } from "./command-listeners/help-commands";
+import { BattleRoyalCommand } from "./command-listeners/battle-royal-command";
 
 export const commandListeners: CommandListener[] = [
   HelpCommands,
@@ -27,6 +28,7 @@ export const commandListeners: CommandListener[] = [
   MediaCommands,
   CarroueCommands,
   SpotifyCommands,
+  BattleRoyalCommand,
 ];
 export const rewardListeners: RewardListener[] = [HeroReward, CarroueReward];
 
@@ -71,4 +73,4 @@ export type RewardListener = (data: {
   socket: ServerSocket;
   obs: OBSWebSocket;
   spotify: SpotifyInstance;
-}) => void;
+}) => Promise<void | boolean>;

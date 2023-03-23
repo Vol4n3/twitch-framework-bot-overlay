@@ -8,6 +8,7 @@ import {
 import { Intersection, Scene2d } from "jcv-ts-utils";
 import { Hero } from "./objects/hero";
 import { buildSpriteSheet } from "./animation/sprite-builder";
+import { PlayerWithHeroStats } from "../../../shared/src/shared-game";
 
 const { VITE_SERVER_ADDRESS, VITE_BROADCAST_ID } = import.meta.env;
 
@@ -20,12 +21,40 @@ const init = async () => {
 
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
     io(VITE_SERVER_ADDRESS);
-  const heroes: Hero[] = [];
+  let tempPlayers: PlayerWithHeroStats[] = [];
+  let heroes: Hero[] = [];
+  let isBr: boolean = false;
 
   container.addEventListener("click", (e) => {
     heroes[0].jump(e.x, e.y);
   });
-
+  const buildHeroes = (
+    players: PlayerWithHeroStats[],
+    isBattleRoyal: boolean = false
+  ) => {
+    heroes.push(
+      ...players.map((player) => {
+        const hero = new Hero(
+          player,
+          {
+            x: (Math.random() * scene.width) / 2,
+            y: 0,
+          },
+          container,
+          spriteSheets[player.skin],
+          isBattleRoyal
+        );
+        hero.onDie = (killer) => {
+          socket.emit("playerKill", {
+            target: hero.player,
+            attacker: killer.player,
+          });
+        };
+        scene.addItem(hero);
+        return hero;
+      })
+    );
+  };
   const connectionToHeat = () => {
     let heat = new WebSocket(
       `wss://heat-api.j38.net/channel/${VITE_BROADCAST_ID}`
@@ -60,8 +89,30 @@ const init = async () => {
         });
       });
     });
+    socket.on("battleRoyal", async (data) => {
+      isBr = true;
+      tempPlayers = heroes.map((h) => h.player);
+      heroes.forEach((item) => scene.removeItem(item));
+      heroes = [];
+      buildHeroes(data.players, true);
+      const refInterval = window.setInterval(() => {
+        const heroesAlives = heroes.reduce((prev, curr) => {
+          return prev + (curr.isAlive() ? 1 : 0);
+        }, 0);
+        if (heroesAlives <= 1) {
+          isBr = false;
+          window.clearInterval(refInterval);
+          const findWinner = heroes.find((f) => f.isAlive());
+          console.log(findWinner);
+          socket.emit("brEnd", { winner: findWinner?.player });
+          heroes.forEach((item) => scene.removeItem(item));
+          buildHeroes(tempPlayers);
+        }
+      }, 1000);
+    });
 
     socket.on("gameState", async (data) => {
+      if (isBr) return;
       heroes.forEach((hero) => {
         const find = data.players.find((f) => f.id === hero.player.id);
         if (!find) return;
@@ -70,27 +121,7 @@ const init = async () => {
       const newPlayers = data.players.filter(
         (f) => !heroes.some((s) => s.player.id === f.id)
       );
-      heroes.push(
-        ...newPlayers.map((newPlayer) => {
-          const hero = new Hero(
-            newPlayer,
-            {
-              x: (Math.random() * scene.width) / 2,
-              y: 0,
-            },
-            container,
-            spriteSheets[newPlayer.skin]
-          );
-          hero.onDie = (killer) => {
-            socket.emit("playerKill", {
-              target: hero.player,
-              attacker: killer.player,
-            });
-          };
-          scene.addItem(hero);
-          return hero;
-        })
-      );
+      buildHeroes(newPlayers);
     });
     socket.on("chatMessage", ({ message, user }) => {
       const findHero = heroes.find((hero) => hero.player.name === user);

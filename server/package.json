@@ -7,7 +7,7 @@
     "server": "tsc && node ./dist/index.js",
     "bot-create-token": "tsc && node ./dist/bot-create-token.js",
     "broadcaster-create-token": "tsc && node ./dist/broadcaster-create-token.js",
-    "watch": "tsc --watch"
+    "watch": "tsc --noEmit --watch "
   },
   "devDependencies": {
     "@twurple/api": "^6.0.9",

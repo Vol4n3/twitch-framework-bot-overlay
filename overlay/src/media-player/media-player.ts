@@ -3,9 +3,17 @@ import "./media-player.scss";
 import { io, Socket } from "socket.io-client";
 import {
   ClientToServerEvents,
+  ClipInfo,
   ServerToClientEvents,
 } from "../../../shared/src/shared-socket";
+
 const { VITE_SERVER_ADDRESS } = import.meta.env;
+
+declare global {
+  interface Window {
+    Twitch: any;
+  }
+}
 // !sound omaewa nani yooo uwu
 const playSound = async (fileName: string) => {
   const audio = new Audio(`/sounds/${fileName}`);
@@ -17,7 +25,8 @@ const playSound = async (fileName: string) => {
 const mediaContainer = document.getElementById(
   "mediaContainer"
 ) as HTMLDivElement;
-const playVideo = async (fileName: string) => {
+
+const playVideo = async (fileName: string): Promise<void> => {
   if (!mediaContainer) return;
   const video = document.createElement("video");
   const source = document.createElement("source");
@@ -26,15 +35,32 @@ const playVideo = async (fileName: string) => {
 
   source.src = `/videos/${fileName}`;
   video.appendChild(source);
-  video.addEventListener(
-    "ended",
-    () => {
-      mediaContainer.removeChild(video);
-    },
-    { once: true }
-  );
-  mediaContainer.appendChild(video);
-  await video.play();
+  return new Promise(async (resolve) => {
+    video.addEventListener(
+      "ended",
+      () => {
+        mediaContainer.removeChild(video);
+        resolve();
+      },
+      { once: true }
+    );
+    mediaContainer.appendChild(video);
+    await video.play();
+  });
+};
+const playTwitchClip = async (clip: ClipInfo) => {
+  const parent = document.getElementById("twitchClip");
+  if (!parent) return;
+  const iframe = document.createElement("iframe");
+  iframe.src = `https://clips.twitch.tv/embed?clip=${clip.id}&autoplay=true&parent=localhost`;
+  iframe.width = "1280px";
+  iframe.height = "720px";
+  parent.appendChild(iframe);
+  iframe.addEventListener("load", () => {
+    setTimeout(() => {
+      parent.removeChild(iframe);
+    }, clip.duration * 1000);
+  });
 };
 const init = () => {
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
@@ -50,9 +76,12 @@ const init = () => {
         await playSound(data.fileName);
       }
     });
-    socket.on("playVideo", async (fileName) => {
-      await playVideo(fileName);
+    socket.on("playVideo", async (data) => {
+      for (let i = 0; i < data.times; i++) {
+        await playVideo(data.fileName);
+      }
     });
+    socket.on("playClip", playTwitchClip);
   });
 };
 init();

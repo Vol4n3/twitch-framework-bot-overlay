@@ -1,4 +1,4 @@
-import { NumberUtils, Scene2d } from "jcv-ts-utils";
+import { Easing, NumberUtils, Scene2d } from "jcv-ts-utils";
 import { Item2Scene } from "jcv-ts-utils/dist/geometry/scene2d";
 import angleRangeLoop = NumberUtils.angleRangeLoop;
 import rangeLoop = NumberUtils.rangeLoop;
@@ -30,6 +30,11 @@ export const choices: Choice[] = [
   { id: "giveOther", name: "File la roue à quelqu'un", color: randomColor() },
   { id: "battleRoyal", name: "Battle Royal", color: randomColor() },
   {
+    id: "heroLevel",
+    name: "Ton héro obtiens de la puissance",
+    color: randomColor(),
+  },
+  {
     id: "refund",
     name: "Rembourse les points de chaines",
     color: randomColor(),
@@ -37,6 +42,7 @@ export const choices: Choice[] = [
 ];
 const quarterSize = PI2 / choices.length;
 export class Carroue implements Item2Scene {
+  private pinRotation: number = 0;
   get show(): boolean {
     return this._show;
   }
@@ -118,6 +124,7 @@ export class Carroue implements Item2Scene {
     ctx.fill();
     ctx.closePath();
     ctx.restore(); // restore rotation
+    ctx.rotate(this.pinRotation);
     ctx.beginPath();
     ctx.moveTo(40, 15);
     ctx.lineTo(100, 0);
@@ -132,7 +139,7 @@ export class Carroue implements Item2Scene {
     this.rotationSpeed = Math.random() / 10 + 0.2;
     this.isUpdated = true;
   }
-  update(): void {
+  update(scene: Scene2d): void {
     if (this.rotationSpeed === 0) return;
     this.isUpdated = true;
     this.rotation += this.rotationSpeed;
@@ -146,6 +153,13 @@ export class Carroue implements Item2Scene {
       );
     if (indexChoice !== this.previousIndex && this.onIndexChange) {
       this.onIndexChange();
+      scene.addEasing({
+        easing: Easing.easeShakeOut(4),
+        start: 0,
+        time: 25,
+        scale: 0.07,
+        onNext: (value) => (this.pinRotation = value),
+      });
     }
     this.previousIndex = indexChoice;
     if (this.rotationSpeed > 0.0001 && Math.random() > 0.6) {

@@ -21,6 +21,7 @@ import { ObsInit } from "./obs/obs-init";
 import { socketClients } from "./socket/socket-clients";
 import { SpotifyInit } from "./spotify/spotify-init";
 import { httpServer } from "./server";
+import { alias } from "./alias";
 
 fs.mkdir(`./${STORAGE_FOLDER}`).catch(() => {});
 fs.mkdir(SOUNDS_PATH).catch(() => {});
@@ -42,6 +43,7 @@ httpServer.listen(SERVER_PORT);
 const gameInstance = new HeroGame();
 
 const usersBlacklist = ["moobot", "b34rbot"].map((m) => m.toLowerCase());
+
 Promise.all([
   TwurpleInit(
     TWITCH_BROADCASTER_CLIENT,
@@ -52,9 +54,10 @@ Promise.all([
   ObsInit(),
   SpotifyInit(),
 ]).then(async ([{ apiClient, pubSubClient }, { chatClient }, obs, spotify]) => {
+  await chatClient.say(TWITCH_CHANNEL, "Me re?voilà !");
   await gameInstance.addPlayer("boss", "Boss");
   socket.on("connection", (socket) => {
-    socketClients({ socket, gameInstance });
+    socketClients({ socket, gameInstance, chatClient });
   });
 
   chatClient.onMessage(
@@ -76,6 +79,7 @@ Promise.all([
         : "";
 
       command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      command = alias(command);
       for (let i = 0; i < commandListeners.length; i++) {
         const cancelNext = await commandListeners[i]({
           channel,
@@ -92,7 +96,7 @@ Promise.all([
           socket,
           obs,
           spotify,
-        });
+        }).catch((e) => console.error(e));
         if (cancelNext) break;
       }
     }
@@ -101,8 +105,8 @@ Promise.all([
   pubSubClient.onRedemption(TWITCH_BROADCASTER_ID, async (message) => {
     const userLower = message.userName.toLowerCase();
     console.log(message.channelId);
-    rewardListeners.forEach((cb) => {
-      cb({
+    for (let i = 0; i < rewardListeners.length; i++) {
+      const cancelNext = await rewardListeners[i]({
         channel: TWITCH_CHANNEL,
         user: userLower,
         rewardTitle: message.rewardTitle,
@@ -114,27 +118,28 @@ Promise.all([
         socket,
         obs,
         spotify,
-      });
-    });
+      }).catch((e) => console.error(e));
+      if (cancelNext) break;
+    }
   });
-});
-
-[
-  "SIGHUP",
-  "SIGINT",
-  "SIGQUIT",
-  "SIGILL",
-  "SIGTRAP",
-  "SIGABRT",
-  "SIGBUS",
-  "SIGFPE",
-  "SIGUSR1",
-  "SIGSEGV",
-  "SIGUSR2",
-  "SIGTERM",
-].forEach((sig: string) => {
-  process.on(sig, async () => {
-    await gameInstance.saveGame();
-    process.exit(0);
+  [
+    "SIGHUP",
+    "SIGINT",
+    "SIGQUIT",
+    "SIGILL",
+    "SIGTRAP",
+    "SIGABRT",
+    "SIGBUS",
+    "SIGFPE",
+    "SIGUSR1",
+    "SIGSEGV",
+    "SIGUSR2",
+    "SIGTERM",
+  ].forEach((sig: string) => {
+    process.on(sig, async () => {
+      await gameInstance.saveGame();
+      await chatClient.say(TWITCH_CHANNEL, "Je reviens peut être !");
+      process.exit(0);
+    });
   });
 });

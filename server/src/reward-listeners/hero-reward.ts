@@ -59,7 +59,7 @@ export const HeroReward: RewardListener = async ({
   }
 
   if (message) {
-    socket.emit("gameState", gameInstance.state);
+    socket.emit("gameState", gameInstance.getState());
     socket.emit("playSound", { fileName: "level.mp3", times: 1 });
     await chatClient.say(channel, message);
   }

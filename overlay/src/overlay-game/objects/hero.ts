@@ -33,12 +33,12 @@ export class Hero implements Item2Scene {
   private messageBox: HTMLElement | null = null;
   private frameCount = 0;
   private health: number;
-
   constructor(
     private _player: PlayerWithHeroStats,
     public position: Point2 = { x: 200, y: 0 },
     private container: HTMLElement,
-    private spriteSheet: SpriteSheet
+    private spriteSheet: SpriteSheet,
+    private isBattleRoyal: boolean = false
   ) {
     this.width = spriteSheet.width * spriteSheet.scale;
     this.height = spriteSheet.height * spriteSheet.scale;
@@ -182,7 +182,7 @@ export class Hero implements Item2Scene {
     const { height, width } = scene;
     this.isUpdated = true;
     const { regen, pv, speed } = this._player.heroStats;
-    if (count % 500 === 0) {
+    if (!this.isBattleRoyal && count % 500 === 0) {
       if (this.isWander()) {
         if (this.animationName === "idle") {
           const rand = Math.random() > 0.3;
@@ -197,8 +197,10 @@ export class Hero implements Item2Scene {
         }
       }
     }
-    if (count % 2000 === 0) {
-      this.health += this.health <= 0 ? pv : regen;
+    if (count % 4000 === 0) {
+      if (!this.isBattleRoyal) {
+        this.health += this.health <= 0 ? pv : regen;
+      }
       if (this.health > pv) {
         this.health = pv;
       }
@@ -374,5 +376,9 @@ export class Hero implements Item2Scene {
       this.setAnimation("idle");
     }, 1000);
     return true;
+  }
+
+  isAlive(): boolean {
+    return this.health > 0;
   }
 }

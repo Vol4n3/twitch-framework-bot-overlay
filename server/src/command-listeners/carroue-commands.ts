@@ -1,5 +1,4 @@
 import { CommandListener } from "../listeners";
-import { TWITCH_CHANNEL } from "../configs";
 import { carroueHolder, setCarroueHolder } from "../carroue-holder";
 
 export const CarroueCommands: CommandListener = async ({
@@ -7,13 +6,14 @@ export const CarroueCommands: CommandListener = async ({
   socket,
   user,
   rawText,
+  meta,
 }) => {
   if (command === "hideroue") {
-    if (user === TWITCH_CHANNEL.toLowerCase()) {
+    if (meta.userInfo.isBroadcaster) {
       socket.emit("showCarroue", false);
     }
   }
-  if (carroueHolder && user === carroueHolder.name) {
+  if (carroueHolder && user === carroueHolder.name && !carroueHolder.haveTurn) {
     const lower = rawText.toLowerCase();
     if (
       lower.includes("t") &&
