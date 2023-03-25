@@ -20,7 +20,7 @@ if (container) {
   window.onclick = () => {
     roue.show = true;
     carroueResult.classList.remove("active");
-    roue.launch();
+    roue.launch(false);
   };
   roue.onIndexChange = async () => {
     const audio = new Audio(`/assets/audio/click.mp3`);
@@ -40,9 +40,9 @@ if (container) {
       carroueResult.classList.remove("active");
       roue.show = value;
     });
-    socket.on("launchCarroue", () => {
+    socket.on("launchCarroue", (invert: boolean) => {
       roue.show = true;
-      roue.launch();
+      roue.launch(invert);
     });
   });
 }

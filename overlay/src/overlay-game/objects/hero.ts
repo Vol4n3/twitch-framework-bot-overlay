@@ -114,8 +114,8 @@ export class Hero implements Item2Scene {
     scene.writeText({
       x: this.width / 2,
       y: -10,
-      text: `${this._player.name}
-      lvl${this._player.level} | ${this.health}❤️‍🔥`,
+      text: `(${this._player.level}) ${this._player.name}
+      ${this.health}❤️‍🔥`,
       textAlign: "center",
       strokeStyle: "black",
       lineWidth: 0.5,
@@ -154,19 +154,24 @@ export class Hero implements Item2Scene {
   }
 
   shakeCamera(scene: Scene2d) {
-    scene.addEasing({
-      easing: Easing.easeShakeOut(8),
-      scale: 5,
-      onNext: (n: number) => (scene.camera.y = n),
-      start: scene.camera.y,
-      time: 10,
-    });
-    scene.addEasing({
-      easing: Easing.easeShake(3),
-      scale: 5,
-      onNext: (n: number) => (scene.camera.x = n),
-      start: scene.camera.x,
-      time: 10,
+    Promise.all([
+      scene.addEasing({
+        easing: Easing.easeShakeOut(8),
+        scale: 5,
+        onNext: (n: number) => (scene.camera.y = n),
+        start: scene.camera.y,
+        time: 10,
+      }),
+      scene.addEasing({
+        easing: Easing.easeShake(3),
+        scale: 5,
+        onNext: (n: number) => (scene.camera.x = n),
+        start: scene.camera.x,
+        time: 10,
+      }),
+    ]).then(() => {
+      scene.camera.y = 0;
+      scene.camera.x = 0;
     });
   }
 

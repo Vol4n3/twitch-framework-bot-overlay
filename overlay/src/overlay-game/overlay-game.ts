@@ -24,7 +24,9 @@ const init = async () => {
   let tempPlayers: PlayerWithHeroStats[] = [];
   let heroes: Hero[] = [];
   let isBr: boolean = false;
-
+  const findHeroById = (id: string): Hero | undefined => {
+    return heroes.find((hero) => hero.player.id === id);
+  };
   container.addEventListener("click", (e) => {
     heroes[0].jump(e.x, e.y);
   });
@@ -63,7 +65,7 @@ const init = async () => {
       if (heatMessage.type !== "message") return;
       const data = JSON.parse(heatMessage.data);
       if (data.type !== "click") return;
-      const findHero = heroes.find((hero) => hero.player.id === data.id);
+      const findHero = findHeroById(data.id);
       if (!findHero) return;
       findHero.jump(data.x * scene.width, data.y * scene.height);
     };
@@ -78,56 +80,64 @@ const init = async () => {
     );
   };
   connectionToHeat();
-  socket.on("connect", () => {
-    scene.addUpdateListener(() => {
-      heroes.forEach((a) => {
-        heroes.forEach((b) => {
-          if (a === b) return;
-          if (Intersection.rectInRect(a.getRect(), b.getRect())) {
-            a.attack(b);
-          }
-        });
-      });
-    });
-    socket.on("battleRoyal", async (data) => {
-      isBr = true;
-      tempPlayers = heroes.map((h) => h.player);
-      heroes.forEach((item) => scene.removeItem(item));
-      heroes = [];
-      buildHeroes(data.players, true);
-      const refInterval = window.setInterval(() => {
-        const heroesAlives = heroes.reduce((prev, curr) => {
-          return prev + (curr.isAlive() ? 1 : 0);
-        }, 0);
-        if (heroesAlives <= 1) {
-          isBr = false;
-          window.clearInterval(refInterval);
-          const findWinner = heroes.find((f) => f.isAlive());
-          console.log(findWinner);
-          socket.emit("brEnd", { winner: findWinner?.player });
-          heroes.forEach((item) => scene.removeItem(item));
-          buildHeroes(tempPlayers);
-        }
-      }, 1000);
-    });
 
-    socket.on("gameState", async (data) => {
-      if (isBr) return;
-      heroes.forEach((hero) => {
-        const find = data.players.find((f) => f.id === hero.player.id);
-        if (!find) return;
-        hero.player = find;
+  scene.addUpdateListener(() => {
+    heroes.forEach((a) => {
+      heroes.forEach((b) => {
+        if (a === b) return;
+        if (Intersection.rectInRect(a.getRect(), b.getRect())) {
+          a.attack(b);
+        }
       });
-      const newPlayers = data.players.filter(
-        (f) => !heroes.some((s) => s.player.id === f.id)
-      );
-      buildHeroes(newPlayers);
     });
-    socket.on("chatMessage", ({ message, user }) => {
-      const findHero = heroes.find((hero) => hero.player.name === user);
-      if (!findHero) return;
-      findHero.say(message);
+  });
+  socket.on("battleRoyal", async (data) => {
+    isBr = true;
+    tempPlayers = heroes.map((h) => h.player);
+    scene.items.forEach((item) => scene.removeItem(item));
+    heroes = [];
+    buildHeroes(data.players, true);
+    const refInterval = window.setInterval(() => {
+      const heroesAlives = heroes.reduce((prev, curr) => {
+        return prev + (curr.isAlive() ? 1 : 0);
+      }, 0);
+      if (heroesAlives <= 1) {
+        isBr = false;
+        window.clearInterval(refInterval);
+        const findWinner = heroes.find((f) => f.isAlive());
+        socket.emit("brEnd", { winner: findWinner?.player });
+        scene.items.forEach((item) => scene.removeItem(item));
+        heroes = [];
+        buildHeroes(tempPlayers);
+      }
+    }, 1000);
+  });
+
+  socket.on("gameState", async (data) => {
+    if (isBr) return;
+    heroes.forEach((hero) => {
+      const find = data.players.find((f) => f.id === hero.player.id);
+      if (!find) return;
+      hero.player = find;
     });
+    const newPlayers = data.players.filter(
+      (f) => !heroes.some((s) => s.player.id === f.id)
+    );
+    buildHeroes(newPlayers);
+  });
+  socket.on("chatMessage", ({ message, userId }) => {
+    const findHero = findHeroById(userId);
+    if (!findHero) return;
+    findHero.say(message);
+  });
+  socket.on("heroJump", ({ userId, direction }) => {
+    const findHero = findHeroById(userId);
+    if (!findHero) return;
+    if (!direction) {
+      findHero.jump(findHero.position.x, 0);
+    } else {
+      findHero.jump(direction === "left" ? 0 : scene.height, 0);
+    }
   });
 };
 init();

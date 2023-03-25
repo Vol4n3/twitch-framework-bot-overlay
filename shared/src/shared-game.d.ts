@@ -1,11 +1,5 @@
-export interface HeroStats {
-  pv: number;
-  power: number;
-  speed: number;
-  dodge: number;
-  critic: number;
-  regen: number;
-}
+export type Stat = "pv" | "power" | "speed" | "dodge" | "critic" | "regen";
+export type HeroStats = { [key in Stat]: number };
 export type HeroSkin =
   | "adventurer"
   | "blueAdventurer"

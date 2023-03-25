@@ -7,7 +7,7 @@ export const HelpCommands: CommandListener = async ({
   args,
   messageCount,
 }) => {
-  if (messageCount % 20 === 0) {
+  if (messageCount % 50 === 0) {
     await chatClient.say(
       channel,
       "N'hésite pas à faire !help pour connaitre les commandes"
@@ -19,22 +19,38 @@ export const HelpCommands: CommandListener = async ({
       "Voici mon ancien discord : https://discord.gg/qx4AVfF"
     );
   }
+  /**
+   * Todo
+   *
+   * faire une commmand pour ajouter des stats via le chat
+   */
+  if (command === "github") {
+    await chatClient.say(
+      channel,
+      "Voila voilou mon github : https://github.com/Vol4n3"
+    );
+  }
   if (command === "help") {
     switch (args[0]) {
       default:
         return await chatClient.say(
           channel,
-          "!help command , pour plus de détail sur la commande. Liste des commandes:!sr !skip !song !random !tts !voice !medias !hero !discord !chain"
+          "!help command , pour plus de détail sur la commande. Liste des commandes:!sr !skip !song !random !tts !voice !medias !hero !jump !discord !chain"
         );
       case "sr":
         return await chatClient.say(
           channel,
           "Ajoute à la playlist un son ,exemple !sr reine des neige"
         );
+      case "jump":
+        return await chatClient.say(
+          channel,
+          "Fait sauter ton héro !jump (right | left) optionnel"
+        );
       case "command":
         return await chatClient.say(
           channel,
-          "C'était juste un exemple LUL met une autre commande pour avoir plus de détail"
+          "C'était juste un exemple LUL met une autre commande pour avoir plus de détails"
         );
       case "skip":
         return await chatClient.say(channel, "Passe la musique à la suivante");

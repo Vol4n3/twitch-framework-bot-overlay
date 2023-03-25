@@ -12,7 +12,7 @@ function randomColor() {
 }
 export type Choice = { name: string; color: string; id: string };
 
-export const choices: Choice[] = [
+const buildChoices = (): Choice[] => [
   { id: "relance", name: "Relance la carroue", color: randomColor() },
   { id: "pompe", name: "10 Pompes !", color: randomColor() },
   { id: "burpee", name: "3 Burpees !", color: randomColor() },
@@ -28,27 +28,37 @@ export const choices: Choice[] = [
   { id: "blague", name: "Raconte un blague", color: randomColor() },
   { id: "squat", name: "20 squats", color: randomColor() },
   { id: "giveOther", name: "File la roue à quelqu'un", color: randomColor() },
+  { id: "changeIde", name: "Change le theme d'IDE", color: randomColor() },
   { id: "battleRoyal", name: "Battle Royal", color: randomColor() },
   {
-    id: "heroLevel",
-    name: "Ton héro obtiens de la puissance",
+    id: "heroUpgrade",
+    name: "Ton héro gagne 20 points de stat",
     color: randomColor(),
   },
   {
+    id: "heroDowngrade",
+    name: "Ton héro perd 5 points de stat :/",
+    color: randomColor(),
+  },
+
+  {
     id: "refund",
-    name: "Rembourse les points de chaines",
+    name: "Rembourse la carroue",
     color: randomColor(),
   },
 ];
-const quarterSize = PI2 / choices.length;
+
 export class Carroue implements Item2Scene {
   private pinRotation: number = 0;
+  private choices: Choice[] = buildChoices();
   get show(): boolean {
     return this._show;
   }
 
   set show(value: boolean) {
     this.isUpdated = true;
+    this.rotation = Math.random() * PI2;
+    this.choices = buildChoices();
     this._show = value;
   }
   isUpdated: boolean = true;
@@ -73,10 +83,10 @@ export class Carroue implements Item2Scene {
     ctx.rect(-rectSize, -rectSize, rectSize * 2, rectSize * 2);
     ctx.clip();
 
-    ctx.globalAlpha = 0.8;
-
-    for (let i = 0; i < choices.length; i++) {
-      const choice = choices[i];
+    ctx.globalAlpha = 0.7;
+    const quarterSize = PI2 / this.choices.length;
+    for (let i = 0; i < this.choices.length; i++) {
+      const choice = this.choices[i];
       if (!choice) continue;
       ctx.save(); // save for color parts
       ctx.beginPath();
@@ -135,8 +145,8 @@ export class Carroue implements Item2Scene {
     ctx.stroke();
     ctx.closePath();
   }
-  launch() {
-    this.rotationSpeed = Math.random() / 10 + 0.2;
+  launch(invert: boolean) {
+    this.rotationSpeed = Math.random() / 10 + 0.2 * (invert ? -1 : 1);
     this.isUpdated = true;
   }
   update(scene: Scene2d): void {
@@ -145,28 +155,34 @@ export class Carroue implements Item2Scene {
     this.rotation += this.rotationSpeed;
     this.rotation = angleRangeLoop(this.rotation);
     const positiveAngle = (this.rotation + PI2) / 2;
+    const quarterSize = PI2 / this.choices.length;
     const indexChoice: number =
-      choices.length -
+      this.choices.length -
       1 -
       Math.floor(
-        rangeLoop(0, positiveAngle / (quarterSize / 2), choices.length)
+        rangeLoop(0, positiveAngle / (quarterSize / 2), this.choices.length)
       );
     if (indexChoice !== this.previousIndex && this.onIndexChange) {
       this.onIndexChange();
-      scene.addEasing({
-        easing: Easing.easeShakeOut(4),
-        start: 0,
-        time: 25,
-        scale: 0.07,
-        onNext: (value) => (this.pinRotation = value),
-      });
+      scene
+        .addEasing({
+          easing: Easing.easeShakeOut(4),
+          start: 0,
+          time: 35,
+          scale: 0.06,
+          onNext: (value) => (this.pinRotation = value),
+        })
+        .then(() => {
+          this.pinRotation = 0;
+        });
     }
     this.previousIndex = indexChoice;
-    if (this.rotationSpeed > 0.0001 && Math.random() > 0.6) {
+    const absSpeed = Math.abs(this.rotationSpeed);
+    if (absSpeed > 0.0001 && Math.random() > 0.6) {
       this.rotationSpeed *= 0.992;
-      if (this.rotationSpeed <= 0.0005) {
+      if (absSpeed <= 0.0005) {
         this.rotationSpeed = 0;
-        if (this.onStop) this.onStop(choices[indexChoice]);
+        if (this.onStop) this.onStop(this.choices[indexChoice]);
       }
     }
   }

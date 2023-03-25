@@ -66,28 +66,26 @@ const playTwitchClip = async (clip: ClipInfo) => {
 const init = () => {
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
     io(VITE_SERVER_ADDRESS);
-  socket.on("connect", () => {
-    socket.on("playMultipleSound", async (data) => {
-      for (let i = 0; i < data.length; i++) {
-        const media = data[i];
-        if (media.type === "sounds") {
-          await playSound(media.fileName);
-        } else {
-          await playVideo(media.fileName, false);
-        }
+  socket.on("playMultipleSound", async (data) => {
+    for (let i = 0; i < data.length; i++) {
+      const media = data[i];
+      if (media.type === "sounds") {
+        await playSound(media.fileName);
+      } else {
+        await playVideo(media.fileName, false);
       }
-    });
-    socket.on("playSound", async (data) => {
-      for (let i = 0; i < data.times; i++) {
-        await playSound(data.fileName);
-      }
-    });
-    socket.on("playVideo", async (data) => {
-      for (let i = 0; i < data.times; i++) {
-        await playVideo(data.fileName, i % 2 === 1);
-      }
-    });
-    socket.on("playClip", playTwitchClip);
+    }
   });
+  socket.on("playSound", async (data) => {
+    for (let i = 0; i < data.times; i++) {
+      await playSound(data.fileName);
+    }
+  });
+  socket.on("playVideo", async (data) => {
+    for (let i = 0; i < data.times; i++) {
+      await playVideo(data.fileName, i % 2 === 1);
+    }
+  });
+  socket.on("playClip", playTwitchClip);
 };
 init();

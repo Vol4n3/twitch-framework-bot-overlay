@@ -1,5 +1,10 @@
 export function alias(command: string) {
   switch (command) {
+    case "saut":
+      return "jump";
+    case "mdr":
+    case "lol":
+      return "rire";
     case "pet":
       return "prout";
     case "sp":

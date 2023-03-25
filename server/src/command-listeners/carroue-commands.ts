@@ -7,9 +7,14 @@ export const CarroueCommands: CommandListener = async ({
   user,
   rawText,
   meta,
+  args,
 }) => {
-  if (command === "hideroue") {
-    if (meta.userInfo.isBroadcaster) {
+  if (meta.userInfo.isBroadcaster) {
+    if (command === "roue") {
+      socket.emit("showCarroue", true);
+      setCarroueHolder(args[0] || user, false);
+    }
+    if (command === "hideroue") {
       socket.emit("showCarroue", false);
     }
   }
@@ -23,7 +28,10 @@ export const CarroueCommands: CommandListener = async ({
       lower.includes("n") &&
       lower.includes("e")
     ) {
-      socket.emit("launchCarroue");
+      let sens =
+        lower.includes("3") && lower.includes("4") && lower.includes("1");
+
+      socket.emit("launchCarroue", sens);
       setCarroueHolder(user, true);
     }
   }

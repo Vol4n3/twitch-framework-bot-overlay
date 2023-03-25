@@ -3,9 +3,6 @@ import {
   TWITCH_BOT_CLIENT,
   TWITCH_BOT_ID,
   TWITCH_BOT_SECRET,
-  TWITCH_BROADCASTER_CLIENT,
-  TWITCH_BROADCASTER_ID,
-  TWITCH_BROADCASTER_SECRET,
 } from "./configs";
 import { httpServer } from "./server";
 import { TwurpleInit } from "./twurple/twurple-init";

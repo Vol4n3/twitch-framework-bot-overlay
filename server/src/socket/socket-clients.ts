@@ -1,7 +1,6 @@
 import { ClientSocket } from "../listeners";
 import { HeroGame } from "../game/hero-game";
 import { ChatClient } from "@twurple/chat";
-import { TWITCH_CHANNEL } from "../configs";
 
 export function socketClients({
   socket,
@@ -23,13 +22,13 @@ export function socketClients({
     if (!win) {
       socket.emit("chatMessage", {
         message: `☠️${data.target.name}☠️`,
-        user: data.attacker.name,
+        userId: data.attacker.id,
       });
       return;
     }
     socket.emit("chatMessage", {
       message: `☠️${data.target.name}☠️ +${win.point} ${win.stat}`,
-      user: data.attacker.name,
+      userId: data.attacker.id,
     });
   });
 }

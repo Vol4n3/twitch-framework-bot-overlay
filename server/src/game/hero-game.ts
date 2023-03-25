@@ -4,6 +4,7 @@ import {
   HeroStats,
   Player,
   PlayerWithHeroStats,
+  Stat,
 } from "../../../shared/src/shared-game";
 import { ArrayUtils, NumberUtils } from "jcv-ts-utils";
 import { STORAGE_FOLDER } from "../configs";
@@ -37,11 +38,11 @@ const pointToStat = ({
 }: HeroStats): HeroStats => {
   // stats en fonction de la classe Choisi ( monk , guerrier, mage )
   return {
-    critic: NumberUtils.round(scaleHyperTangent(critic, 1000, 60, 1), 100),
-    dodge: NumberUtils.round(scaleHyperTangent(dodge, 1000, 60, 1), 100),
+    critic: NumberUtils.round(scaleHyperTangent(critic, 1000, 70, 1), 100),
+    dodge: NumberUtils.round(scaleHyperTangent(dodge, 1000, 70, 1), 100),
     power: NumberUtils.round(scaleHyperTangent(power, 1000, 100, 2), 1),
-    pv: NumberUtils.round(scaleHyperTangent(pv, 1000, 400, 10), 1),
-    regen: NumberUtils.round(scaleHyperTangent(regen, 1000, 40, 1), 1),
+    pv: NumberUtils.round(scaleHyperTangent(pv, 1000, 200, 10), 1),
+    regen: NumberUtils.round(scaleHyperTangent(regen, 1000, 20, 1), 1),
     speed: NumberUtils.round(scaleHyperTangent(speed, 1000, 200, 0), 1),
   };
 };
@@ -89,13 +90,21 @@ export class HeroGame {
     const state = await loadData().catch(() => console.log("create game file"));
     return state || { players: [] };
   }
-
-  /**
-   * @todo Refact ce code pour utilise les id et non les playername
-   */
-  async addPoint(playerName: string, which: keyof HeroStats, amount: number) {
+  async addPointByName(playerName: string, which: Stat, amount: number) {
     this.players = this.players.map((player) => {
       if (player.name !== playerName) return player;
+      console.log(`add ${amount} to ${which} of ${playerName} heroes`);
+      return {
+        ...player,
+        points: { ...player.points, [which]: player.points[which] + amount },
+      };
+    });
+    return this.saveGame();
+  }
+  async addPointById(playerId: string, which: Stat, amount: number) {
+    this.players = this.players.map((player) => {
+      if (player.id !== playerId) return player;
+      console.log(`add ${amount} to ${which} of ${playerId} heroes`);
       return {
         ...player,
         points: { ...player.points, [which]: player.points[which] + amount },
@@ -104,13 +113,16 @@ export class HeroGame {
     return this.saveGame();
   }
 
-  getPlayerState(playerName: string): PlayerWithHeroStats | undefined {
+  getPlayerStateByName(playerName: string): PlayerWithHeroStats | undefined {
     return this.getState().players.find((p) => p.name === playerName);
+  }
+  getPlayerStateById(playerId: string): PlayerWithHeroStats | undefined {
+    return this.getState().players.find((p) => p.id === playerId);
   }
 
   playerStateToString(playerName: string): string {
     const player: PlayerWithHeroStats | undefined =
-      this.getPlayerState(playerName);
+      this.getPlayerStateByName(playerName);
     if (!player) return "";
     return `@${playerName}: lvl(${player.level})
       ${player.heroStats.pv}❤️‍🔥
@@ -155,8 +167,8 @@ export class HeroGame {
     attacker: PlayerWithHeroStats,
     target: PlayerWithHeroStats
   ): Promise<undefined | { point: number; stat: keyof HeroStats }> {
-    const attackerState = this.getPlayerState(attacker.name);
-    const targetState = this.getPlayerState(target.name);
+    const attackerState = this.getPlayerStateById(attacker.id);
+    const targetState = this.getPlayerStateById(target.id);
     if (!attackerState || !targetState) {
       return;
     }
@@ -183,7 +195,7 @@ export class HeroGame {
       "regen",
       "speed",
     ]);
-    await this.addPoint(attacker.name, rand, winPoint);
+    await this.addPointById(attacker.id, rand, winPoint);
     return { point: winPoint, stat: rand };
   }
 }
