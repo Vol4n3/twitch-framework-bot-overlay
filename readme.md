@@ -34,8 +34,6 @@ and edit these files for config app
 
 * STORAGE_FOLDER=storage
 * SOUNDS_PATH=../overlay/public/sounds
-* VIDEOS_GREEN_PATH=../overlay/public/videos/green
-* VIDEOS_STANDARD_PATH=../overlay/public/videos/standard
 * You can find at spotify https://developer.spotify.com/dashboard/login
   * SPOTIFY_CLIENT=
   * SPOTIFY_SECRET=
