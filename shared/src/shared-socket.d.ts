@@ -3,11 +3,13 @@ type mediaOption = {
   fileName: string;
   times: number;
 };
+export type MediasType = "sounds" | "videos";
+export type MediasChoice = { type: MediasType; fileName: string };
 type ClipInfo = { id: string; duration };
 export interface ServerToClientEvents {
   gameState: (data: GameData<PlayerWithHeroStats>) => void;
   playSound: (data: mediaOption) => void;
-  playMultipleSound: (data: string[]) => void;
+  playMultipleSound: (data: MediasChoice[]) => void;
   playVideo: (data: mediaOption) => void;
   showCarroue: (data: boolean) => void;
   launchCarroue: () => void;

@@ -59,6 +59,7 @@ export type CommandListener = (data: {
   socket: ServerSocket;
   obs: OBSWebSocket;
   spotify: SpotifyInstance;
+  messageCount: number;
 }) => Promise<void | boolean>;
 
 export type RewardListener = (data: {

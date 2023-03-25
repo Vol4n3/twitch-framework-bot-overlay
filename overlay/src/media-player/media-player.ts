@@ -26,10 +26,11 @@ const mediaContainer = document.getElementById(
   "mediaContainer"
 ) as HTMLDivElement;
 
-const playVideo = async (fileName: string): Promise<void> => {
+const playVideo = async (fileName: string, flip: boolean): Promise<void> => {
   if (!mediaContainer) return;
   const video = document.createElement("video");
   const source = document.createElement("source");
+  if (flip) video.style.transform = "rotateY(180deg)";
   video.controls = false;
   video.autoplay = true;
 
@@ -68,7 +69,12 @@ const init = () => {
   socket.on("connect", () => {
     socket.on("playMultipleSound", async (data) => {
       for (let i = 0; i < data.length; i++) {
-        await playSound(data[i]);
+        const media = data[i];
+        if (media.type === "sounds") {
+          await playSound(media.fileName);
+        } else {
+          await playVideo(media.fileName, false);
+        }
       }
     });
     socket.on("playSound", async (data) => {
@@ -78,7 +84,7 @@ const init = () => {
     });
     socket.on("playVideo", async (data) => {
       for (let i = 0; i < data.times; i++) {
-        await playVideo(data.fileName);
+        await playVideo(data.fileName, i % 2 === 1);
       }
     });
     socket.on("playClip", playTwitchClip);

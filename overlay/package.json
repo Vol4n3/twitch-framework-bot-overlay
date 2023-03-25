@@ -5,12 +5,13 @@
   "type": "module",
   "scripts": {
     "overlay": "vite serve",
-    "build": "tsc && vite build",
+    "build": "rimraf -rf ./dist && tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
     "@types/node": "^18.14.6",
     "prettier": "^2.8.4",
+    "rimraf": "^4.4.1",
     "sass": "^1.58.3",
     "typescript": "^4.9.5",
     "vite": "^4.1.4"

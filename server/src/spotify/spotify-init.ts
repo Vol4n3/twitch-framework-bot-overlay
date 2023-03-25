@@ -16,6 +16,8 @@ import {
 const crypto = require("node:crypto");
 const open = require("open");
 let _spotifyCode: string;
+const spotifyAccountUri = "https://accounts.spotify.com";
+const spotifyApiUri = "https://api.spotify.com/v1";
 export const setSpotifyCode = (code: string) => {
   _spotifyCode = code;
 };
@@ -53,33 +55,35 @@ const makeFormBody = (obj: { [key: string]: string }) => {
   });
   return formBody.join("&");
 };
-
-export async function SpotifyInit(): Promise<SpotifyInstance> {
+export async function refreshToken(token: SpotifyToken): Promise<SpotifyToken> {
+  return fetch(`${spotifyAccountUri}/api/token`, {
+    method: "POST",
+    body: makeFormBody({
+      grant_type: "refresh_token",
+      refresh_token: token.refresh_token,
+    }),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
+      Authorization:
+        "Basic " +
+        Buffer.from(SPOTIFY_CLIENT + ":" + SPOTIFY_SECRET).toString("base64"),
+    },
+  })
+    .then((blob) => blob.json())
+    .catch((err) => console.log(err));
+}
+export async function spotifyInit(): Promise<SpotifyInstance> {
   let token: SpotifyToken;
   try {
     token = await getToken();
-    token = await fetch("https://accounts.spotify.com/api/token", {
-      method: "POST",
-      body: makeFormBody({
-        grant_type: "refresh_token",
-        refresh_token: token.refresh_token,
-      }),
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8",
-        Authorization:
-          "Basic " +
-          Buffer.from(SPOTIFY_CLIENT + ":" + SPOTIFY_SECRET).toString("base64"),
-      },
-    })
-      .then((blob) => blob.json())
-      .catch((err) => console.log(err));
+    token = await refreshToken(token);
   } catch (e) {
     const state = crypto.randomUUID();
     const scopes =
       "user-read-playback-state user-modify-playback-state user-read-currently-playing user-read-private";
     await open(
-      "https://accounts.spotify.com/authorize?" +
+      `${spotifyAccountUri}/authorize?` +
         "response_type=code&" +
         `client_id=${SPOTIFY_CLIENT}&` +
         `scope=${scopes}&` +
@@ -88,7 +92,7 @@ export async function SpotifyInit(): Promise<SpotifyInstance> {
     );
     console.log("waiting for spotify authentification");
     const code = await getSpotifyCode();
-    token = await fetch("https://accounts.spotify.com/api/token", {
+    token = await fetch(`${spotifyAccountUri}/api/token`, {
       method: "POST",
       body: makeFormBody({
         grant_type: "authorization_code",
@@ -108,19 +112,23 @@ export async function SpotifyInit(): Promise<SpotifyInstance> {
     await saveToken(token);
   }
   console.log("Spotify success authentification");
+  setInterval(async () => {
+    console.log("Spotify refresh token");
+    token = await refreshToken(token);
+  }, 3600 * 1000);
   const headers = {
     Accept: "application/json",
     "Content-Type": "application/json",
     Authorization: `Bearer ${token.access_token}`,
   };
   const getCurrentPlay = async (): Promise<SpotifyCurrentPlay> => {
-    return fetch("https://api.spotify.com/v1/me/player/currently-playing", {
+    return fetch(`${spotifyApiUri}/me/player/currently-playing`, {
       headers,
     }).then((blob) => blob.json());
   };
 
   const skipPlayer = async (): Promise<void> => {
-    return fetch("https://api.spotify.com/v1/me/player/next", {
+    return fetch(`${spotifyApiUri}/me/player/next`, {
       headers,
       method: "POST",
     })
@@ -129,10 +137,7 @@ export async function SpotifyInit(): Promise<SpotifyInstance> {
   };
   const searchTrack = async (search: string): Promise<SpotifySearch> => {
     return fetch(
-      "https://api.spotify.com/v1/search?" +
-        `q=${search}&` +
-        `type=track&` +
-        `limit=1`,
+      `${spotifyApiUri}/search?` + `q=${search}&` + `type=track&` + `limit=1`,
       { headers }
     ).then((blob) => blob.json());
   };
@@ -146,13 +151,10 @@ export async function SpotifyInit(): Promise<SpotifyInstance> {
     if (!find) {
       throw new Error("Not found");
     }
-    await fetch(
-      "https://api.spotify.com/v1/me/player/queue?" + `uri=${find.uri}`,
-      {
-        headers,
-        method: "POST",
-      }
-    );
+    await fetch(`${spotifyApiUri}/me/player/queue?` + `uri=${find.uri}`, {
+      headers,
+      method: "POST",
+    });
     return find;
   };
   return { getCurrentPlay, skipPlayer, addQueue };

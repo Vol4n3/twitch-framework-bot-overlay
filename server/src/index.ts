@@ -19,7 +19,7 @@ import { initMedias } from "./command-listeners/medias-commands";
 import { TwurpleInit } from "./twurple/twurple-init";
 import { ObsInit } from "./obs/obs-init";
 import { socketClients } from "./socket/socket-clients";
-import { SpotifyInit } from "./spotify/spotify-init";
+import { spotifyInit } from "./spotify/spotify-init";
 import { httpServer } from "./server";
 import { alias } from "./alias";
 
@@ -43,7 +43,7 @@ httpServer.listen(SERVER_PORT);
 const gameInstance = new HeroGame();
 
 const usersBlacklist = ["moobot", "b34rbot"].map((m) => m.toLowerCase());
-
+let messageCount = 0;
 Promise.all([
   TwurpleInit(
     TWITCH_BROADCASTER_CLIENT,
@@ -52,7 +52,7 @@ Promise.all([
   ),
   TwurpleInit(TWITCH_BOT_CLIENT, TWITCH_BOT_SECRET, TWITCH_BOT_ID),
   ObsInit(),
-  SpotifyInit(),
+  spotifyInit(),
 ]).then(async ([{ apiClient, pubSubClient }, { chatClient }, obs, spotify]) => {
   await chatClient.say(TWITCH_CHANNEL, "Me re?voilà !");
   await gameInstance.addPlayer("boss", "Boss");
@@ -96,6 +96,7 @@ Promise.all([
           socket,
           obs,
           spotify,
+          messageCount: ++messageCount,
         }).catch((e) => console.error(e));
         if (cancelNext) break;
       }
