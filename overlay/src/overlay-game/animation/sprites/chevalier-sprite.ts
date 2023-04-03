@@ -3,7 +3,7 @@ import { rangeArray } from "../range";
 
 export const chevalierSpriteAnimations: SpritesAnimation = {
   walk: {
-    delay: 20,
+    delay: 15,
     sprites: rangeArray(8, 15),
   },
   attack1: {
@@ -19,7 +19,7 @@ export const chevalierSpriteAnimations: SpritesAnimation = {
     sprites: rangeArray(16, 25),
   },
   run: {
-    delay: 10,
+    delay: 8,
     sprites: rangeArray(8, 15),
   },
   idle: {
@@ -51,7 +51,7 @@ export const chevalierSpriteAnimations: SpritesAnimation = {
     sprites: rangeArray(40, 42),
   },
   getUp: {
-    delay: 6,
-    sprites: [38, 37, 36, 35],
+    delay: 15,
+    sprites: rangeArray(35, 38).reverse(),
   },
 };

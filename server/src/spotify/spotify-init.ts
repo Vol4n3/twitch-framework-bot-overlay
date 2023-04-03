@@ -126,7 +126,7 @@ export async function spotifyInit(): Promise<SpotifyInstance> {
     console.log("Spotify refresh token");
 
     await refreshToken(await getToken());
-  }, 5000);
+  }, 3500 * 1000);
 
   const getCurrentPlay = async (): Promise<SpotifyCurrentPlay> => {
     return fetch(`${spotifyApiUri}/me/player/currently-playing`, {

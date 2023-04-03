@@ -7,6 +7,7 @@ import { pimoukiSpriteAnimations } from "./sprites/pimouki-sprite";
 import { icecopteredSpriteAnimations } from "./sprites/icecoptered-sprite";
 import { kikiksSpriteAnimations } from "./sprites/kikiks-sprite";
 import { tarteyfletteSpriteAnimations } from "./sprites/tarte_y_flette-sprite";
+import { andrewSpriteAnimations } from "./sprites/andrew-sprite";
 
 export const buildSpriteSheet = async (): Promise<{
   [key in HeroSkin]: SpriteSheet;
@@ -19,6 +20,7 @@ export const buildSpriteSheet = async (): Promise<{
     kikiks,
     icecoptered,
     tarte_y_flette,
+    andrew,
   ] = await Promise.all([
     loadImage("/assets/img/adventurer-sheet.png"),
     loadImage("/assets/img/adventurer-sheet-blue.png"),
@@ -27,6 +29,7 @@ export const buildSpriteSheet = async (): Promise<{
     loadImage("/assets/img/kikiks.png"),
     loadImage("/assets/img/icecoptered.png"),
     loadImage("/assets/img/tarte_y_flette.png"),
+    loadImage("/assets/img/andrew.png"),
   ]);
   return {
     adventurer: {
@@ -82,6 +85,13 @@ export const buildSpriteSheet = async (): Promise<{
         left: 10,
         right: 10,
       },
+    },
+    andrew: {
+      image: andrew,
+      animations: andrewSpriteAnimations,
+      width: 64,
+      height: 46,
+      scale: 3,
     },
   };
 };

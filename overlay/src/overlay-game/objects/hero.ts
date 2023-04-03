@@ -116,11 +116,11 @@ export class Hero implements Item2Scene {
       x: this.width / 2,
       y: -10 + (this.spriteSheet.cropHitBox?.top || 0),
       text: `(${this._player.level}) ${this._player.name}
-      ${this.health}❤️‍🔥`,
+      ${this.canAttack() ? "⚔️" : ""} ${this.health}❤️‍🔥`,
       textAlign: "center",
       strokeStyle: "black",
       lineWidth: 0.5,
-      fillStyle: this.lastAttack ? "yellow" : "white",
+      fillStyle: "white",
     });
     if (this.floatingMessage) {
       scene.writeText({
@@ -324,12 +324,15 @@ export class Hero implements Item2Scene {
       this.grounded = false;
     }, 400);
   }
-
+  canAttack(): boolean {
+    return !(
+      (this.animationName !== "run" && this.animationName !== "walk") ||
+      this.lastAttack
+    );
+  }
   attack(target: Hero): boolean {
     if (this.health <= 0) return false;
-    if (this.animationName !== "run" && this.animationName !== "walk")
-      return false;
-    if (this.lastAttack) return false;
+    if (!this.canAttack()) return false;
     if (target.health <= 0) return false;
     if (this.velocity.x > 0) {
       if (this.position.x > target.position.x) return false;

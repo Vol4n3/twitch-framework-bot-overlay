@@ -26,11 +26,11 @@ const buildChoices = (): Choice[] =>
     //{ id: "burpee", name: "3 Burpees !", color: randomColor() },
     { id: "vip", name: "Vip une semaine", color: randomColor() },
     { id: "karaoke", name: "Karaoké", color: randomColor() },
-    {
+    /*    {
       id: "addChoice",
       name: "Ajoute un défi à la carroue",
       color: randomColor(),
-    },
+    },*/
 
     { id: "loose", name: "Perdu !", color: randomColor() },
     {
@@ -46,7 +46,12 @@ const buildChoices = (): Choice[] =>
     { id: "battleRoyal", name: "Battle Royal", color: randomColor() },
     {
       id: "heroUpgrade",
-      name: "Ton héro gagne 20 points de stat",
+      name: "Ton héro gagne 20 points de stats",
+      color: randomColor(),
+    },
+    {
+      id: "heroBoostUpgrade",
+      name: "Ton héro gagne 40 points de stats",
       color: randomColor(),
     },
     {

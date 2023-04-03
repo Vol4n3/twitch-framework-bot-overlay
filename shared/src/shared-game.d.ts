@@ -7,6 +7,7 @@ export type HeroSkin =
   | "pimouki"
   | "kikiks"
   | "tarte_y_flette"
+  | "andrew"
   | "icecoptered";
 export interface Player {
   id: string;
