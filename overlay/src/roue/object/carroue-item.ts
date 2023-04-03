@@ -1,5 +1,11 @@
-import { Easing, NumberUtils, Scene2d } from "jcv-ts-utils";
-import { Item2Scene } from "jcv-ts-utils/dist/geometry/scene2d";
+import {
+  Easing,
+  NumberUtils,
+  Scene2d,
+  Item2Scene,
+  ArrayUtils,
+} from "jcv-ts-utils";
+
 import angleRangeLoop = NumberUtils.angleRangeLoop;
 import rangeLoop = NumberUtils.rangeLoop;
 import PI2 = NumberUtils.PI2;
@@ -12,41 +18,49 @@ function randomColor() {
 }
 export type Choice = { name: string; color: string; id: string };
 
-const buildChoices = (): Choice[] => [
-  { id: "relance", name: "Relance la carroue", color: randomColor() },
-  { id: "pompe", name: "10 Pompes !", color: randomColor() },
-  { id: "burpee", name: "3 Burpees !", color: randomColor() },
-  { id: "vip", name: "Vip une semaine", color: randomColor() },
-  { id: "karaoke", name: "Karaoké", color: randomColor() },
-  {
-    id: "addChoice",
-    name: "Ajoute un défi à la carroue",
-    color: randomColor(),
-  },
-  { id: "loose", name: "Perdu !", color: randomColor() },
-  { id: "grimace", name: "une Grimace", color: randomColor() },
-  { id: "blague", name: "Raconte un blague", color: randomColor() },
-  { id: "squat", name: "20 squats", color: randomColor() },
-  { id: "giveOther", name: "File la roue à quelqu'un", color: randomColor() },
-  { id: "changeIde", name: "Change le theme d'IDE", color: randomColor() },
-  { id: "battleRoyal", name: "Battle Royal", color: randomColor() },
-  {
-    id: "heroUpgrade",
-    name: "Ton héro gagne 20 points de stat",
-    color: randomColor(),
-  },
-  {
-    id: "heroDowngrade",
-    name: "Ton héro perd 5 points de stat :/",
-    color: randomColor(),
-  },
+const buildChoices = (): Choice[] =>
+  ArrayUtils.shuffle([
+    { id: "relance", name: "Relance la carroue", color: randomColor() },
+    { id: "horoscope", name: "Lis l'horoscope", color: randomColor() },
+    //{ id: "pompe", name: "10 Pompes !", color: randomColor() },
+    //{ id: "burpee", name: "3 Burpees !", color: randomColor() },
+    { id: "vip", name: "Vip une semaine", color: randomColor() },
+    { id: "karaoke", name: "Karaoké", color: randomColor() },
+    {
+      id: "addChoice",
+      name: "Ajoute un défi à la carroue",
+      color: randomColor(),
+    },
 
-  {
-    id: "refund",
-    name: "Rembourse la carroue",
-    color: randomColor(),
-  },
-];
+    { id: "loose", name: "Perdu !", color: randomColor() },
+    {
+      id: "iceChoice",
+      name: "Retirer mes lunettes pendant 5 min",
+      color: randomColor(),
+    },
+    { id: "grimace", name: "une Grimace", color: randomColor() },
+    { id: "blague", name: "Raconte une blague", color: randomColor() },
+    //{ id: "squat", name: "20 squats", color: randomColor() },
+    { id: "giveOther", name: "File la roue à quelqu'un", color: randomColor() },
+    { id: "changeIde", name: "Change le theme d'IDE", color: randomColor() },
+    { id: "battleRoyal", name: "Battle Royal", color: randomColor() },
+    {
+      id: "heroUpgrade",
+      name: "Ton héro gagne 20 points de stat",
+      color: randomColor(),
+    },
+    {
+      id: "heroDowngrade",
+      name: "Ton héro perd 5 points de stat :/",
+      color: randomColor(),
+    },
+
+    {
+      id: "refund",
+      name: "Rembourse la carroue",
+      color: randomColor(),
+    },
+  ]);
 
 export class Carroue implements Item2Scene {
   private pinRotation: number = 0;

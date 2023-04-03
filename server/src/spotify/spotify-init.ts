@@ -14,6 +14,7 @@ import {
 } from "./spotify-types";
 
 const crypto = require("node:crypto");
+const URL = require("node:url");
 const open = require("open");
 let _spotifyCode: string;
 const spotifyAccountUri = "https://accounts.spotify.com";
@@ -55,8 +56,16 @@ const makeFormBody = (obj: { [key: string]: string }) => {
   });
   return formBody.join("&");
 };
-export async function refreshToken(token: SpotifyToken): Promise<SpotifyToken> {
-  return fetch(`${spotifyAccountUri}/api/token`, {
+export async function getAuthHeader() {
+  const token = await getToken();
+  return {
+    Accept: "application/json",
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token.access_token}`,
+  };
+}
+export async function refreshToken(token: SpotifyToken) {
+  const refreshToken = await fetch(`${spotifyAccountUri}/api/token`, {
     method: "POST",
     body: makeFormBody({
       grant_type: "refresh_token",
@@ -72,12 +81,13 @@ export async function refreshToken(token: SpotifyToken): Promise<SpotifyToken> {
   })
     .then((blob) => blob.json())
     .catch((err) => console.log(err));
+  await saveToken({ ...token, ...refreshToken });
 }
 export async function spotifyInit(): Promise<SpotifyInstance> {
   let token: SpotifyToken;
   try {
     token = await getToken();
-    token = await refreshToken(token);
+    await refreshToken(token);
   } catch (e) {
     const state = crypto.randomUUID();
     const scopes =
@@ -114,22 +124,19 @@ export async function spotifyInit(): Promise<SpotifyInstance> {
   console.log("Spotify success authentification");
   setInterval(async () => {
     console.log("Spotify refresh token");
-    token = await refreshToken(token);
-  }, 3600 * 1000);
-  const headers = {
-    Accept: "application/json",
-    "Content-Type": "application/json",
-    Authorization: `Bearer ${token.access_token}`,
-  };
+
+    await refreshToken(await getToken());
+  }, 5000);
+
   const getCurrentPlay = async (): Promise<SpotifyCurrentPlay> => {
     return fetch(`${spotifyApiUri}/me/player/currently-playing`, {
-      headers,
+      headers: await getAuthHeader(),
     }).then((blob) => blob.json());
   };
 
   const skipPlayer = async (): Promise<void> => {
     return fetch(`${spotifyApiUri}/me/player/next`, {
-      headers,
+      headers: await getAuthHeader(),
       method: "POST",
     })
       .then((blob) => blob.json())
@@ -138,21 +145,31 @@ export async function spotifyInit(): Promise<SpotifyInstance> {
   const searchTrack = async (search: string): Promise<SpotifySearch> => {
     return fetch(
       `${spotifyApiUri}/search?` + `q=${search}&` + `type=track&` + `limit=1`,
-      { headers }
+      { headers: await getAuthHeader() }
     ).then((blob) => blob.json());
   };
 
   const addQueue = async (search: string): Promise<SpotifyTrack> => {
-    const track = await searchTrack(search);
-    if (!(track.tracks && track.tracks.items.length)) {
-      throw new Error("Not found");
+    let find: SpotifyTrack;
+    try {
+      const url = new URL(search);
+      const trackId = url.pathname.replace("/track/");
+      find = await fetch(`${spotifyApiUri}/tracks/${trackId}`, {
+        headers: await getAuthHeader(),
+        method: "POST",
+      }).then((blob) => blob.json());
+    } catch (e) {
+      const track = await searchTrack(search);
+      if (!(track.tracks && track.tracks.items.length)) {
+        throw new Error("Not found");
+      }
+      find = track.tracks.items[0];
     }
-    const find = track.tracks.items[0];
     if (!find) {
       throw new Error("Not found");
     }
     await fetch(`${spotifyApiUri}/me/player/queue?` + `uri=${find.uri}`, {
-      headers,
+      headers: await getAuthHeader(),
       method: "POST",
     });
     return find;

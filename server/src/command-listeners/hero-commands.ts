@@ -46,7 +46,9 @@ export const HeroCommands: CommandListener = async ({
     await chatClient.say(channel, message);
   }
   if (command === "jump") {
-    const direction = args[0];
+    let direction = args[0];
+    if (direction === "droite") direction = "right";
+    if (direction === "gauche") direction = "left";
     socket.emit("heroJump", {
       userId,
       direction:

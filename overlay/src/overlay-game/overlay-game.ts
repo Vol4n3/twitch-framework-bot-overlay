@@ -66,6 +66,7 @@ const init = async () => {
       const data = JSON.parse(heatMessage.data);
       if (data.type !== "click") return;
       const findHero = findHeroById(data.id);
+      console.log(findHero, data);
       if (!findHero) return;
       findHero.jump(data.x * scene.width, data.y * scene.height);
     };

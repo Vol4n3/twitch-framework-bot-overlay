@@ -22,4 +22,10 @@ export type SpriteSheet = {
   width: number;
   height: number;
   scale: number;
+  cropHitBox?: {
+    top?: number;
+    left?: number;
+    right?: number;
+    bottom?: number;
+  };
 };

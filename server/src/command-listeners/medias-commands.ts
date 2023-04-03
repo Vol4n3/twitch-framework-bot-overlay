@@ -28,7 +28,7 @@ export async function initMedias() {
     console.log(`${type} found files`, files.length);
 
     files.forEach((fileName, i) => {
-      const match = fileName.match(/(.+)\d\./);
+      const match = fileName.match(/([a-z]+)[0-9]+\./i);
       if (match) {
         const id = match[1].toLowerCase();
         const findIndex = groupedMedias.findIndex((r) => r.id === id);
@@ -133,7 +133,7 @@ export const MediaCommands: CommandListener = async ({
   }
   const playSound = (fileName: string, times: number) => {
     times = isNaN(times) ? 1 : times;
-    times = times > 5 ? 5 : times;
+    times = times > 3 ? 3 : times;
 
     socket.emit("playSound", {
       fileName,

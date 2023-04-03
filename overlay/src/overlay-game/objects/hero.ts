@@ -74,11 +74,12 @@ export class Hero implements Item2Scene {
   }
 
   getRect(): Rectangle.Rectangle2 {
+    const crop = this.spriteSheet.cropHitBox || {};
     return {
-      x: this.position.x + this.width / 2,
-      y: this.position.y,
-      w: this.width - this.width / 2,
-      h: this.height,
+      x: this.position.x + this.width / 2 - (crop.left || 0),
+      y: this.position.y - (crop.top || 0),
+      w: this.width - this.width / 2 - (crop.right || 0),
+      h: this.height - (crop.bottom || 0),
     };
   }
 
@@ -113,13 +114,13 @@ export class Hero implements Item2Scene {
     ctx.restore();
     scene.writeText({
       x: this.width / 2,
-      y: -10,
+      y: -10 + (this.spriteSheet.cropHitBox?.top || 0),
       text: `(${this._player.level}) ${this._player.name}
       ${this.health}❤️‍🔥`,
       textAlign: "center",
       strokeStyle: "black",
       lineWidth: 0.5,
-      fillStyle: "white",
+      fillStyle: this.lastAttack ? "yellow" : "white",
     });
     if (this.floatingMessage) {
       scene.writeText({
@@ -187,7 +188,7 @@ export class Hero implements Item2Scene {
     const { height, width } = scene;
     this.isUpdated = true;
     const { regen, pv, speed } = this._player.heroStats;
-    if (!this.isBattleRoyal && count % 500 === 0) {
+    if (!this.isBattleRoyal && count % 300 === 0) {
       if (this.isWander()) {
         if (this.animationName === "idle") {
           const rand = Math.random() > 0.3;

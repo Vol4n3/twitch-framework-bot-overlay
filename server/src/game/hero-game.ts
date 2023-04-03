@@ -40,8 +40,8 @@ const pointToStat = ({
   return {
     critic: NumberUtils.round(scaleHyperTangent(critic, 1000, 70, 1), 100),
     dodge: NumberUtils.round(scaleHyperTangent(dodge, 1000, 70, 1), 100),
-    power: NumberUtils.round(scaleHyperTangent(power, 1000, 100, 2), 1),
-    pv: NumberUtils.round(scaleHyperTangent(pv, 1000, 200, 10), 1),
+    power: NumberUtils.round(scaleHyperTangent(power, 1000, 60, 2), 1),
+    pv: NumberUtils.round(scaleHyperTangent(pv, 1000, 220, 10), 1),
     regen: NumberUtils.round(scaleHyperTangent(regen, 1000, 20, 1), 1),
     speed: NumberUtils.round(scaleHyperTangent(speed, 1000, 200, 0), 1),
   };

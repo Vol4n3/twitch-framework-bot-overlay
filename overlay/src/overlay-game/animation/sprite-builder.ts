@@ -6,19 +6,28 @@ import { chevalierSpriteAnimations } from "./sprites/chevalier-sprite";
 import { pimoukiSpriteAnimations } from "./sprites/pimouki-sprite";
 import { icecopteredSpriteAnimations } from "./sprites/icecoptered-sprite";
 import { kikiksSpriteAnimations } from "./sprites/kikiks-sprite";
+import { tarteyfletteSpriteAnimations } from "./sprites/tarte_y_flette-sprite";
 
 export const buildSpriteSheet = async (): Promise<{
   [key in HeroSkin]: SpriteSheet;
 }> => {
-  const [adventurer, blueAdventurer, chevalier, pimouki, kikiks, icecoptered] =
-    await Promise.all([
-      loadImage("/assets/img/adventurer-sheet.png"),
-      loadImage("/assets/img/adventurer-sheet-blue.png"),
-      loadImage("/assets/img/chevalier-sheet.png"),
-      loadImage("/assets/img/pimouki.png"),
-      loadImage("/assets/img/kikiks.png"),
-      loadImage("/assets/img/icecoptered.png"),
-    ]);
+  const [
+    adventurer,
+    blueAdventurer,
+    chevalier,
+    pimouki,
+    kikiks,
+    icecoptered,
+    tarte_y_flette,
+  ] = await Promise.all([
+    loadImage("/assets/img/adventurer-sheet.png"),
+    loadImage("/assets/img/adventurer-sheet-blue.png"),
+    loadImage("/assets/img/chevalier-sheet.png"),
+    loadImage("/assets/img/pimouki.png"),
+    loadImage("/assets/img/kikiks.png"),
+    loadImage("/assets/img/icecoptered.png"),
+    loadImage("/assets/img/tarte_y_flette.png"),
+  ]);
   return {
     adventurer: {
       image: adventurer,
@@ -61,6 +70,18 @@ export const buildSpriteSheet = async (): Promise<{
       width: 48,
       height: 32,
       scale: 5,
+    },
+    tarte_y_flette: {
+      image: tarte_y_flette,
+      animations: tarteyfletteSpriteAnimations,
+      width: 599,
+      height: 256,
+      scale: 0.7,
+      cropHitBox: {
+        top: 30,
+        left: 10,
+        right: 10,
+      },
     },
   };
 };
