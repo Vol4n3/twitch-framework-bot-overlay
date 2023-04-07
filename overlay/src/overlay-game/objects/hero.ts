@@ -11,12 +11,60 @@ import {
   AnimationName,
   SpriteSheet,
 } from "../animation/sprites/sprite-animation";
-import Point2 = Point.Point2;
+function rotateColors(data: Uint8ClampedArray, angle: number) {
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  const length = data.length;
+  const sinSqrt = Math.sqrt(1 / 3) * sin;
+  const cosTierce = (1 - cos) / 3;
+  const A = cos + cosTierce;
+  const B = cosTierce - sinSqrt;
+  const C = cosTierce + sinSqrt;
+  for (let i = 0; i < length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    data[i] = A * r + B * g + C * b;
+    data[i + 1] = C * r + A * g + B * b;
+    data[i + 2] = B * r + C * g + A * b;
+  }
+}
 
+const effectSprite = (
+  spriteSheet: SpriteSheet,
+  width: number,
+  height: number,
+  animationFrame: number,
+  time: number
+) => {
+  const tempCanvas = document.createElement("canvas");
+  const tempCtx = tempCanvas.getContext("2d");
+  if (!tempCtx) return;
+  tempCanvas.width = width;
+  tempCanvas.height = height;
+  tempCtx.imageSmoothingEnabled = false;
+  tempCtx.drawImage(
+    spriteSheet.image,
+    spriteSheet.width * animationFrame,
+    0,
+    spriteSheet.width,
+    spriteSheet.height,
+    0,
+    0,
+    width,
+    height
+  );
+
+  const data = tempCtx.getImageData(0, 0, width, height);
+  rotateColors(data.data, time / 10);
+
+  tempCtx.putImageData(data, 0, 0);
+  return tempCanvas;
+};
 export class Hero implements Item2Scene {
   isUpdated: boolean = true;
   scenePriority: number = 0;
-  velocity: Point2 = { x: 0, y: 0 };
+  velocity: Point.Point2 = { x: 0, y: 0 };
   width: number = 0;
   height: number = 0;
   animationName: AnimationName = "walk";
@@ -35,7 +83,7 @@ export class Hero implements Item2Scene {
   private health: number;
   constructor(
     private _player: PlayerWithHeroStats,
-    public position: Point2 = { x: 200, y: 0 },
+    public position: Point.Point2 = { x: 200, y: 0 },
     private container: HTMLElement,
     private spriteSheet: SpriteSheet,
     private isBattleRoyal: boolean = false
@@ -82,11 +130,11 @@ export class Hero implements Item2Scene {
       h: this.height - (crop.bottom || 0),
     };
   }
-
-  draw2d(scene: Scene2d): void {
+  coloration: number | null = 0;
+  draw2d(scene: Scene2d, time: number): void {
     const { ctx } = scene;
     const { x, y } = this.position;
-    scene.ctx.imageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
     ctx.translate(x, y);
     ctx.save();
     if (this.velocity.x < 0) {
@@ -98,19 +146,31 @@ export class Hero implements Item2Scene {
     const animationFrame = sprites.at(loop);
 
     if (typeof animationFrame !== "undefined") {
-      ctx.drawImage(
-        this.spriteSheet.image,
-        this.spriteSheet.width * animationFrame,
-        0,
-        this.spriteSheet.width,
-        this.spriteSheet.height,
-        0,
-        0,
+      const resultEffect = effectSprite(
+        this.spriteSheet,
         this.width,
-        this.height
+        this.height,
+        animationFrame,
+        this.coloration === null ? time : this.coloration
       );
+      if (resultEffect) {
+        ctx.drawImage(resultEffect, 0, 0);
+      } else {
+        ctx.drawImage(
+          this.spriteSheet.image,
+          this.spriteSheet.width * animationFrame,
+          0,
+          this.spriteSheet.width,
+          this.spriteSheet.height,
+          0,
+          0,
+          this.width,
+          this.height
+        );
+      }
       this.frameCount++;
     }
+
     ctx.restore();
     scene.writeText({
       x: this.width / 2,
@@ -191,19 +251,19 @@ export class Hero implements Item2Scene {
     if (!this.isBattleRoyal && count % 300 === 0) {
       if (this.isWander()) {
         if (this.animationName === "idle") {
-          const rand = Math.random() > 0.3;
+          const rand = Math.random() > 0.2;
           if (rand) {
             this.move();
           }
         } else {
-          const rand = Math.random() > 0.7;
+          const rand = Math.random() > 0.8;
           if (rand) {
             this.stop();
           }
         }
       }
     }
-    if (count % 4000 === 0) {
+    if (count % 3000 === 0) {
       if (!this.isBattleRoyal) {
         this.health += this.health <= 0 ? pv : regen;
       }

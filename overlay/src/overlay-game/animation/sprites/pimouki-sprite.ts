@@ -1,46 +1,46 @@
 import { SpritesAnimation } from "./sprite-animation";
-import { rangeArray } from "../range";
+import { ArrayUtils } from "jcv-ts-utils";
 
 export const pimoukiSpriteAnimations: SpritesAnimation = {
   walk: {
     delay: 20,
-    sprites: rangeArray(6, 12),
+    sprites: ArrayUtils.range(6, 12),
   },
   attack1: {
     delay: 6,
-    sprites: rangeArray(46, 52),
+    sprites: ArrayUtils.range(46, 52),
   },
   attack2: {
     delay: 6,
-    sprites: rangeArray(41, 45),
+    sprites: ArrayUtils.range(41, 45),
   },
   attack3: {
     delay: 6,
-    sprites: rangeArray(26, 30),
+    sprites: ArrayUtils.range(26, 30),
   },
   run: {
     delay: 10,
-    sprites: rangeArray(18, 21),
+    sprites: ArrayUtils.range(18, 21),
   },
   idle: {
     delay: 10,
-    sprites: rangeArray(0, 5),
+    sprites: ArrayUtils.range(0, 5),
   },
   slideAndUp: {
     delay: 10,
-    sprites: rangeArray(53, 54),
+    sprites: ArrayUtils.range(53, 54),
   },
   jump: {
     delay: 15,
-    sprites: rangeArray(22, 23),
+    sprites: ArrayUtils.range(22, 23),
   },
   fall: {
     delay: 5,
-    sprites: rangeArray(24, 25),
+    sprites: ArrayUtils.range(24, 25),
   },
   knockDown: {
     delay: 15,
-    sprites: rangeArray(59, 65),
+    sprites: ArrayUtils.range(59, 65),
   },
   down: {
     delay: 5,
@@ -48,10 +48,10 @@ export const pimoukiSpriteAnimations: SpritesAnimation = {
   },
   hurt: {
     delay: 6,
-    sprites: rangeArray(55, 58),
+    sprites: ArrayUtils.range(55, 58),
   },
   getUp: {
     delay: 6,
-    sprites: [65, 64, 63, 62, 61, 60, 59],
+    sprites: ArrayUtils.range(65, 59),
   },
 };

@@ -917,10 +917,10 @@ iterate-value@^1.0.2:
     es-get-iterator "^1.0.2"
     iterate-iterator "^1.0.1"
 
-jcv-ts-utils@^1.1.7:
-  version "1.1.7"
-  resolved "https://registry.yarnpkg.com/jcv-ts-utils/-/jcv-ts-utils-1.1.7.tgz#4a553dac4c919d034c39de451f13b7f7537eb4fd"
-  integrity sha512-CKkBXNMgX9K8o5Lm94597EME3Modf/KrE2g09cmS8/lWnySWbnyPHwmj44XGcxEsh3lHPUye919bq/u5dd9z1A==
+jcv-ts-utils@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/jcv-ts-utils/-/jcv-ts-utils-1.2.0.tgz#cb68c34278501890e786a4054c0cd8a57d39bc58"
+  integrity sha512-l72bMkImBngLIwAeTtyABXEx2JUePOFItqpzcR59xEU++YJm5KQliS72kk0oyeyhVwfWzAbzC0fXhaopnXM98g==
 
 klona@^2.0.4, klona@^2.0.5:
   version "2.0.6"

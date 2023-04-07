@@ -1,57 +1,57 @@
 import { SpritesAnimation } from "./sprite-animation";
-import { rangeArray } from "../range";
+import { ArrayUtils } from "jcv-ts-utils";
 
 export const andrewSpriteAnimations: SpritesAnimation = {
   walk: {
     delay: 10,
-    sprites: rangeArray(16, 31),
+    sprites: ArrayUtils.range(16, 31),
   },
   attack1: {
     delay: 5,
-    sprites: rangeArray(58, 68),
+    sprites: ArrayUtils.range(58, 68),
   },
   attack2: {
     delay: 5,
-    sprites: rangeArray(58, 68),
+    sprites: ArrayUtils.range(58, 68),
   },
   attack3: {
     delay: 5,
-    sprites: rangeArray(58, 68),
+    sprites: ArrayUtils.range(58, 68),
   },
   run: {
     delay: 7,
-    sprites: rangeArray(32, 39),
+    sprites: ArrayUtils.range(32, 39),
   },
   idle: {
     delay: 8,
-    sprites: rangeArray(0, 15),
+    sprites: ArrayUtils.range(0, 15),
   },
   slideAndUp: {
     delay: 6,
-    sprites: rangeArray(49, 57),
+    sprites: ArrayUtils.range(49, 57),
   },
   jump: {
     delay: 10,
-    sprites: rangeArray(40, 45),
+    sprites: ArrayUtils.range(40, 45),
   },
   fall: {
     delay: 5,
-    sprites: rangeArray(46, 48),
+    sprites: ArrayUtils.range(46, 48),
   },
   knockDown: {
     delay: 20,
-    sprites: rangeArray(74, 77),
+    sprites: ArrayUtils.range(74, 77),
   },
   down: {
     delay: 6,
-    sprites: [78],
+    sprites: ArrayUtils.range(78, 78),
   },
   hurt: {
     delay: 6,
-    sprites: rangeArray(69, 73),
+    sprites: ArrayUtils.range(69, 73),
   },
   getUp: {
     delay: 4,
-    sprites: [79],
+    sprites: ArrayUtils.range(79, 79),
   },
 };

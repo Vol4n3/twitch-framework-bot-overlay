@@ -1,34 +1,34 @@
 import { SpritesAnimation } from "./sprite-animation";
-import { rangeArray } from "../range";
+import { ArrayUtils } from "jcv-ts-utils";
 
 export const kikiksSpriteAnimations: SpritesAnimation = {
   walk: {
     delay: 20,
-    sprites: rangeArray(6, 11),
+    sprites: ArrayUtils.range(6, 11),
   },
   attack1: {
     delay: 6,
-    sprites: rangeArray(25, 31),
+    sprites: ArrayUtils.range(25, 31),
   },
   attack2: {
     delay: 6,
-    sprites: rangeArray(32, 38),
+    sprites: ArrayUtils.range(32, 38),
   },
   attack3: {
     delay: 6,
-    sprites: rangeArray(25, 31),
+    sprites: ArrayUtils.range(25, 31),
   },
   run: {
     delay: 10,
-    sprites: rangeArray(12, 17),
+    sprites: ArrayUtils.range(12, 17),
   },
   idle: {
     delay: 10,
-    sprites: rangeArray(0, 5),
+    sprites: ArrayUtils.range(0, 5),
   },
   slideAndUp: {
     delay: 10,
-    sprites: rangeArray(18, 21),
+    sprites: ArrayUtils.range(18, 21),
   },
   jump: {
     delay: 15,
@@ -40,7 +40,7 @@ export const kikiksSpriteAnimations: SpritesAnimation = {
   },
   knockDown: {
     delay: 15,
-    sprites: rangeArray(42, 49),
+    sprites: ArrayUtils.range(42, 49),
   },
   down: {
     delay: 5,
@@ -48,10 +48,10 @@ export const kikiksSpriteAnimations: SpritesAnimation = {
   },
   hurt: {
     delay: 6,
-    sprites: rangeArray(39, 41),
+    sprites: ArrayUtils.range(39, 41),
   },
   getUp: {
     delay: 6,
-    sprites: rangeArray(42, 49).reverse(),
+    sprites: ArrayUtils.range(49, 42),
   },
 };

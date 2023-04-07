@@ -35,12 +35,17 @@ export const HelpCommands: CommandListener = async ({
       default:
         return await chatClient.say(
           channel,
-          "!help command , pour plus de détail sur la commande. Liste des commandes:!sr !skip !song !random !tts !voice !medias !hero !jump !discord !chain"
+          "!help command , pour plus de détail sur la commande. Liste des commandes:!color !sr !skip !song !random !tts !voice !medias !hero !jump !discord !chain"
         );
       case "sr":
         return await chatClient.say(
           channel,
           "Ajoute à la playlist un son ,exemple !sr reine des neige"
+        );
+      case "color":
+        return await chatClient.say(
+          channel,
+          "met ton hero coloré !color  ou  !color 50  pour une couleur fixe"
         );
       case "jump":
         return await chatClient.say(

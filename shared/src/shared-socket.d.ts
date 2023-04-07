@@ -21,6 +21,7 @@ export interface ServerToClientEvents {
   }) => void;
   playClip: (data: ClipInfo) => void;
   battleRoyal: (data: GameData<PlayerWithHeroStats>) => void;
+  heroColor: (data: { playerId: string; color: string }) => void;
 }
 
 export interface ClientToServerEvents {

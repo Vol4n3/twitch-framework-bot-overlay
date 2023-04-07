@@ -36,7 +36,9 @@ export const HeroCommands: CommandListener = async ({
       }
     }
   }
-
+  if (command === "color") {
+    socket.emit("heroColor", { playerId: userId, color: args[0] || "0" });
+  }
   if (command === "hero") {
     // await gameInstance.addPlayer(userId, user);
     const name = args[0] || user;

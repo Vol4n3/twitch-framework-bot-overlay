@@ -140,5 +140,16 @@ const init = async () => {
       findHero.jump(direction === "left" ? 0 : scene.height, 0);
     }
   });
+  socket.on("heroColor", (data) => {
+    const hero = findHeroById(data.playerId);
+    if (!hero) {
+      return;
+    }
+    try {
+      hero.coloration = (parseInt(data.color, 10) || 0) / 10;
+    } catch (e) {
+      hero.coloration = null;
+    }
+  });
 };
 init();

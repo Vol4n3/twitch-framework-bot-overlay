@@ -1,38 +1,38 @@
 import { SpritesAnimation } from "./sprite-animation";
-import { rangeArray } from "../range";
+import { ArrayUtils } from "jcv-ts-utils";
 
 export const chevalierSpriteAnimations: SpritesAnimation = {
   walk: {
     delay: 15,
-    sprites: rangeArray(8, 15),
+    sprites: ArrayUtils.range(8, 15),
   },
   attack1: {
     delay: 6,
-    sprites: rangeArray(16, 25),
+    sprites: ArrayUtils.range(16, 25),
   },
   attack2: {
     delay: 6,
-    sprites: rangeArray(16, 25),
+    sprites: ArrayUtils.range(16, 25),
   },
   attack3: {
     delay: 6,
-    sprites: rangeArray(16, 25),
+    sprites: ArrayUtils.range(16, 25),
   },
   run: {
     delay: 8,
-    sprites: rangeArray(8, 15),
+    sprites: ArrayUtils.range(8, 15),
   },
   idle: {
     delay: 10,
-    sprites: rangeArray(0, 7),
+    sprites: ArrayUtils.range(0, 7),
   },
   slideAndUp: {
     delay: 10,
-    sprites: rangeArray(31, 34),
+    sprites: ArrayUtils.range(31, 34),
   },
   jump: {
     delay: 15,
-    sprites: rangeArray(26, 29),
+    sprites: ArrayUtils.range(26, 29),
   },
   fall: {
     delay: 5,
@@ -40,7 +40,7 @@ export const chevalierSpriteAnimations: SpritesAnimation = {
   },
   knockDown: {
     delay: 15,
-    sprites: rangeArray(35, 38),
+    sprites: ArrayUtils.range(35, 38),
   },
   down: {
     delay: 5,
@@ -48,10 +48,10 @@ export const chevalierSpriteAnimations: SpritesAnimation = {
   },
   hurt: {
     delay: 6,
-    sprites: rangeArray(40, 42),
+    sprites: ArrayUtils.range(40, 42),
   },
   getUp: {
     delay: 15,
-    sprites: rangeArray(35, 38).reverse(),
+    sprites: ArrayUtils.range(38, 35),
   },
 };
