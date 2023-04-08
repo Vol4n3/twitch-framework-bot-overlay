@@ -146,7 +146,12 @@ const init = async () => {
       return;
     }
     try {
-      hero.coloration = (parseInt(data.color, 10) || 0) / 10;
+      const code = parseInt(data.color, 10);
+      if (isNaN(code)) {
+        hero.coloration = null;
+      } else {
+        hero.coloration = code / 10;
+      }
     } catch (e) {
       hero.coloration = null;
     }

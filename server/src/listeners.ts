@@ -20,10 +20,12 @@ import { SpotifyInstance } from "./spotify/spotify-types";
 import { SpotifyCommands } from "./command-listeners/spotify-commands";
 import { HelpCommands } from "./command-listeners/help-commands";
 import { BattleRoyalCommand } from "./command-listeners/battle-royal-command";
+import { MinecraftCommand } from "./command-listeners/minecraft-command";
 
 export const commandListeners: CommandListener[] = [
   HelpCommands,
   HeroCommands,
+  MinecraftCommand,
   TtsCommands,
   MediaCommands,
   CarroueCommands,

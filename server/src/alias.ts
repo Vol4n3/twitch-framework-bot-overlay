@@ -2,6 +2,8 @@ export function alias(command: string) {
   switch (command) {
     case "saut":
       return "jump";
+    case "say":
+      return "tts";
     case "chaine":
     case "list":
     case "suite":

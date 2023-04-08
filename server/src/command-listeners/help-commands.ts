@@ -1,4 +1,6 @@
 import { CommandListener } from "../listeners";
+import { ArrayUtils } from "jcv-ts-utils";
+import pickRandomOne = ArrayUtils.pickRandomOne;
 
 export const HelpCommands: CommandListener = async ({
   command,
@@ -8,10 +10,18 @@ export const HelpCommands: CommandListener = async ({
   messageCount,
 }) => {
   if (messageCount % 50 === 0) {
-    await chatClient.say(
-      channel,
-      "N'hésite pas à faire !help pour connaitre les commandes"
-    );
+    const rand = pickRandomOne([
+      "N'hésite pas à faire !help pour connaitre les commandes",
+      "Ajoute à la playlist des sons ! exemple !sr la reine des neige",
+      "Tu peux parler avec une voix de syntheses, ex: !say bonjour (!voice pour voir les Différentes voix ex: !voice paul)",
+      "Liste des médias : !medias",
+      "Essaye !random",
+      "Change la couleur de ton avatar !color 300 (entre 0 et 600)",
+      "Fait sauter ton avatar !jump",
+      "Je commence à être intelligent, je serais peut être un jour humain !",
+      "Miam le miel j'adore ça , dans 10 - 20 ans il y en n'aura plus",
+    ]);
+    await chatClient.say(channel, rand);
   }
   if (command === "discord") {
     await chatClient.say(
