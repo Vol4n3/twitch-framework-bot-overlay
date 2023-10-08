@@ -4,10 +4,12 @@ export function alias(command: string) {
       return "jump";
     case "say":
       return "tts";
+    case "sounds":
+    case "videos":
+      return "medias";
     case "chaine":
     case "list":
     case "suite":
-    case "sounds":
       return "chain";
     case "mdr":
     case "lol":
@@ -18,12 +20,17 @@ export function alias(command: string) {
     case "sp":
       return "sr";
     case "commands":
+    case "comand":
+    case "comands":
     case "command":
     case "commandes":
     case "aide":
+    case "aides":
+    case "helps":
       return "help";
     case "musique":
     case "soung":
+    case "spotify":
     case "play":
       return "song";
     default:

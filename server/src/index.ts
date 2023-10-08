@@ -22,6 +22,7 @@ import { socketClients } from "./socket/socket-clients";
 import { spotifyInit } from "./spotify/spotify-init";
 import { httpServer } from "./server";
 import { alias } from "./alias";
+import { ArrayUtils } from "jcv-ts-utils";
 
 fs.mkdir(`./${STORAGE_FOLDER}`).catch(() => {});
 fs.mkdir(SOUNDS_PATH).catch(() => {});
@@ -54,95 +55,125 @@ Promise.all([
   ObsInit(),
   spotifyInit(),
 ])
-  .then(async ([{ apiClient, pubSubClient }, { chatClient }, obs, spotify]) => {
-    await chatClient.say(TWITCH_CHANNEL, "Me re?voilà !");
-    await gameInstance.addPlayer("boss", "Boss");
-    socket.on("connection", (socket) => {
-      socketClients({ socket, gameInstance, chatClient });
-    });
+  .then(
+    async ([
+      { apiClient, pubSubClient },
+      { chatClient, apiClient: apiBotClient },
+      obs,
+      spotify,
+    ]) => {
+      await chatClient.say(
+        TWITCH_CHANNEL,
+        ArrayUtils.pickRandomOne([
+          "Me re?voilà !",
+          "Re !",
+          "Je suis prêt",
+          "c’était rapide",
+          "Hello world!",
+        ])
+      );
+      await gameInstance.addPlayer("boss", "Boss");
+      socket.on("connection", (socket) => {
+        socketClients({ socket, gameInstance, chatClient });
+      });
 
-    chatClient.onMessage(
-      async (
-        channel: string,
-        user: string,
-        text: string,
-        meta: PrivateMessage
-      ) => {
-        const userLower = user.toLowerCase();
-        if (usersBlacklist.includes(userLower)) return;
-        const extractEmotes = meta
-          .parseEmotes()
-          .map((p) => (p.type === "text" ? p.text : ""));
-        const parsedText = extractEmotes.join(" ");
-        const [first, ...args] = parsedText.split(" ");
-        let command = first.startsWith("!")
-          ? first.replace(/!/g, "").toLowerCase()
-          : "";
+      chatClient.onMessage(
+        async (
+          channel: string,
+          user: string,
+          text: string,
+          meta: PrivateMessage
+        ) => {
+          if (meta.isRedemption) return;
+          const userLower = user.toLowerCase();
+          if (usersBlacklist.includes(userLower)) return;
+          const extractEmotes = meta
+            .parseEmotes()
+            .map((p) => (p.type === "text" ? p.text : ""));
+          const parsedText = extractEmotes.join(" ");
+          const [first, ...args] = parsedText.split(" ");
+          let command = first.startsWith("!")
+            ? first.replace(/!/g, "").toLowerCase()
+            : "";
 
-        command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        command = alias(command);
-        for (let i = 0; i < commandListeners.length; i++) {
-          const cancelNext = await commandListeners[i]({
-            channel,
+          command = command.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+          command = alias(command);
+          for (let i = 0; i < commandListeners.length; i++) {
+            const cancelNext = await commandListeners[i]({
+              channel,
+              user: userLower,
+              rawText: text,
+              command,
+              meta,
+              parsedText,
+              args: args.map((arg) => arg.toLowerCase()),
+              chatClient,
+              apiClient,
+              apiBotClient,
+              userId: meta.userInfo.userId,
+              gameInstance,
+              socket,
+              obs,
+              spotify,
+              messageCount: ++messageCount,
+            }).catch((e) => console.error(e));
+            if (typeof cancelNext === "boolean" && cancelNext) break;
+          }
+        }
+      );
+
+      pubSubClient.onRedemption(TWITCH_BROADCASTER_ID, async (message) => {
+        const userLower = message.userName.toLowerCase();
+        for (let i = 0; i < rewardListeners.length; i++) {
+          const cancelNext = await rewardListeners[i]({
+            channel: TWITCH_CHANNEL,
             user: userLower,
-            rawText: text,
-            command,
-            meta,
-            parsedText,
-            args: args.map((arg) => arg.toLowerCase()),
+            rewardTitle: message.rewardTitle,
+            rewardId: message.rewardId,
+            userId: message.userId,
+            message: message.message,
+            gameInstance,
             chatClient,
             apiClient,
-            userId: meta.userInfo.userId,
-            gameInstance,
+            apiBotClient,
             socket,
             obs,
             spotify,
-            messageCount: ++messageCount,
           }).catch((e) => console.error(e));
-          if (cancelNext) break;
+          if (typeof cancelNext === "boolean" && cancelNext) break;
         }
-      }
-    );
-
-    pubSubClient.onRedemption(TWITCH_BROADCASTER_ID, async (message) => {
-      const userLower = message.userName.toLowerCase();
-      console.log(message.channelId);
-      for (let i = 0; i < rewardListeners.length; i++) {
-        const cancelNext = await rewardListeners[i]({
-          channel: TWITCH_CHANNEL,
-          user: userLower,
-          rewardTitle: message.rewardTitle,
-          userId: message.userId,
-          message: message.message,
-          gameInstance,
-          chatClient,
-          apiClient,
-          socket,
-          obs,
-          spotify,
-        }).catch((e) => console.error(e));
-        if (cancelNext) break;
-      }
-    });
-    [
-      "SIGHUP",
-      "SIGINT",
-      "SIGQUIT",
-      "SIGILL",
-      "SIGTRAP",
-      "SIGABRT",
-      "SIGBUS",
-      "SIGFPE",
-      "SIGUSR1",
-      "SIGSEGV",
-      "SIGUSR2",
-      "SIGTERM",
-    ].forEach((sig: string) => {
-      process.on(sig, async () => {
-        await gameInstance.saveGame();
-        await chatClient.say(TWITCH_CHANNEL, "Je reviens peut être !");
-        process.exit(0);
       });
-    });
-  })
+      [
+        "SIGHUP",
+        "SIGINT",
+        "SIGQUIT",
+        "SIGILL",
+        "SIGTRAP",
+        "SIGABRT",
+        "SIGBUS",
+        "SIGFPE",
+        "SIGUSR1",
+        "SIGSEGV",
+        "SIGUSR2",
+        "SIGTERM",
+      ].forEach((sig: string) => {
+        process.on(sig, async () => {
+          await gameInstance.saveGame();
+          await chatClient.say(
+            TWITCH_CHANNEL,
+            ArrayUtils.pickRandomOne([
+              "Je reviens peut être !",
+              "À tantôt",
+              "I brb",
+              "Au revoir!",
+              "C’est bon je me casse",
+              "Pause bio!",
+              "Je dois couler un navire de guerre, je reviens !",
+            ])
+          );
+          process.exit(0);
+        });
+      });
+    }
+  )
   .catch((reason) => console.log(reason));

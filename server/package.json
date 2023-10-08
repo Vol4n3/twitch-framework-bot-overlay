@@ -10,11 +10,11 @@
     "watch": "tsc --noEmit --watch "
   },
   "devDependencies": {
-    "@twurple/api": "^6.0.9",
-    "@twurple/auth": "^6.0.9",
-    "@twurple/chat": "^6.0.9",
-    "@twurple/eventsub-ws": "^6.0.9",
-    "@twurple/pubsub": "^6.0.9",
+    "@twurple/api": "^6.2.0",
+    "@twurple/auth": "^6.2.0",
+    "@twurple/chat": "^6.2.0",
+    "@twurple/eventsub-ws": "^6.2.0",
+    "@twurple/pubsub": "^6.2.0",
     "@types/node": "^18.15.3",
     "dotenv": "^16.0.3",
     "jcv-ts-utils": "^1.2.0",

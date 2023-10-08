@@ -14,20 +14,20 @@ declare global {
     Twitch: any;
   }
 }
-// !sound omaewa nani yooo uwu
-const playSound = async (fileName: string) => {
+async function playSound(fileName: string): Promise<number> {
   const audio = new Audio(`/sounds/${fileName}`);
   await audio.play();
-  await new Promise((resolve) =>
-    setTimeout(resolve, audio.duration * 1000 * 0.8)
+  return new Promise((resolve) =>
+    setTimeout(() => resolve(audio.duration), audio.duration * 1000 * 0.8)
   );
-};
+}
+
 const mediaContainer = document.getElementById(
   "mediaContainer"
 ) as HTMLDivElement;
 
-const playVideo = async (fileName: string, flip: boolean): Promise<void> => {
-  if (!mediaContainer) return;
+async function playVideo(fileName: string, flip: boolean): Promise<number> {
+  if (!mediaContainer) return 0;
   const video = document.createElement("video");
   const source = document.createElement("source");
   if (flip) video.style.transform = "rotateY(180deg)";
@@ -41,15 +41,16 @@ const playVideo = async (fileName: string, flip: boolean): Promise<void> => {
       "ended",
       () => {
         mediaContainer.removeChild(video);
-        resolve();
+        resolve(video.duration);
       },
       { once: true }
     );
     mediaContainer.appendChild(video);
     await video.play();
   });
-};
-const playTwitchClip = async (clip: ClipInfo) => {
+}
+
+async function playTwitchClip(clip: ClipInfo) {
   const parent = document.getElementById("twitchClip");
   if (!parent) return;
   const iframe = document.createElement("iframe");
@@ -62,30 +63,36 @@ const playTwitchClip = async (clip: ClipInfo) => {
       parent.removeChild(iframe);
     }, clip.duration * 1000);
   });
-};
-const init = () => {
+}
+
+function init() {
   const socket: Socket<ServerToClientEvents, ClientToServerEvents> =
     io(VITE_SERVER_ADDRESS);
   socket.on("playMultipleSound", async (data) => {
     for (let i = 0; i < data.length; i++) {
       const media = data[i];
       if (media.type === "sounds") {
-        await playSound(media.fileName);
+        const duration = await playSound(media.fileName);
+        if (duration > 7) break;
       } else {
-        await playVideo(media.fileName, false);
+        const duration = await playVideo(media.fileName, false);
+        if (duration > 7) break;
       }
     }
   });
   socket.on("playSound", async (data) => {
     for (let i = 0; i < data.times; i++) {
-      await playSound(data.fileName);
+      const duration = await playSound(data.fileName);
+      if (duration > 7) break;
     }
   });
   socket.on("playVideo", async (data) => {
     for (let i = 0; i < data.times; i++) {
-      await playVideo(data.fileName, i % 2 === 1);
+      const duration = await playVideo(data.fileName, i % 2 === 1);
+      if (duration > 7) break;
     }
   });
   socket.on("playClip", playTwitchClip);
-};
+}
+
 init();

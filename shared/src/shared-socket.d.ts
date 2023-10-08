@@ -12,6 +12,7 @@ export interface ServerToClientEvents {
   playSound: (data: mediaOption) => void;
   playMultipleSound: (data: MediasChoice[]) => void;
   playVideo: (data: mediaOption) => void;
+  playSecret: (data: mediaOption) => void;
   showCarroue: (data: boolean) => void;
   launchCarroue: (data: boolean) => void;
   chatMessage: (data: { message: string; userId: string }) => void;

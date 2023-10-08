@@ -20,19 +20,22 @@ import { SpotifyInstance } from "./spotify/spotify-types";
 import { SpotifyCommands } from "./command-listeners/spotify-commands";
 import { HelpCommands } from "./command-listeners/help-commands";
 import { BattleRoyalCommand } from "./command-listeners/battle-royal-command";
-import { MinecraftCommand } from "./command-listeners/minecraft-command";
+import { MinecraftReward } from "./reward-listeners/minecraft-reward";
 
 export const commandListeners: CommandListener[] = [
   HelpCommands,
   HeroCommands,
-  MinecraftCommand,
   TtsCommands,
   MediaCommands,
   CarroueCommands,
   SpotifyCommands,
   BattleRoyalCommand,
 ];
-export const rewardListeners: RewardListener[] = [HeroReward, CarroueReward];
+export const rewardListeners: RewardListener[] = [
+  HeroReward,
+  CarroueReward,
+  MinecraftReward,
+];
 
 export type ServerSocket = Server<
   ClientToServerEvents,
@@ -57,23 +60,26 @@ export type CommandListener = (data: {
   args: string[];
   chatClient: ChatClient;
   apiClient: ApiClient;
+  apiBotClient: ApiClient;
   gameInstance: HeroGame;
   socket: ServerSocket;
   obs: OBSWebSocket;
   spotify: SpotifyInstance;
   messageCount: number;
-}) => Promise<void | boolean>;
+}) => Promise<void | any | boolean>;
 
 export type RewardListener = (data: {
   channel: string;
   rewardTitle: string;
+  rewardId: string;
   user: string;
   userId: string;
   message: string | undefined;
   gameInstance: HeroGame;
   chatClient: ChatClient;
   apiClient: ApiClient;
+  apiBotClient: ApiClient;
   socket: ServerSocket;
   obs: OBSWebSocket;
   spotify: SpotifyInstance;
-}) => Promise<void | boolean>;
+}) => Promise<void | any | boolean>;

@@ -26,7 +26,9 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.post("/", (req, res) => {
+  console.log("command receive");
   if (req.body.cmd) {
+    console.log(req.body.cmd);
     minecraftInstance.stdin.write(req.body.cmd + "\r");
     res.sendStatus(200);
   } else {

@@ -73,6 +73,7 @@ export async function TwurpleInit(
         "channel:manage:redemptions+" +
         "channel:read:redemptions+" +
         "channel:manage:vips+" +
+        "user:manage:whispers+" +
         "channel:read:redemptions"
     );
     console.log("waiting for twitch authentification");

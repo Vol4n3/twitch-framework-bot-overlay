@@ -98,6 +98,31 @@ export const HelpCommands: CommandListener = async ({
           channel,
           "Chaine les medias : example !chain uwu hello bonjour"
         );
+      case "entity":
+        return await chatClient.say(
+          channel,
+          "invoque une créature, liste des entities : https://www.digminecraft.com/lists/entity_list_pc.php"
+        );
+      case "effect":
+        return await chatClient.say(
+          channel,
+          "applique un effet , liste des effets : https://www.digminecraft.com/lists/effect_list_pc.php"
+        );
+      case "block":
+        return await chatClient.say(
+          channel,
+          "Place un bloc  , liste des blocs : https://fr-minecraft.net/3-differents-blocs-jeu.php"
+        );
+      case "sound":
+        return await chatClient.say(
+          channel,
+          "ajoute un son minecraft  , liste des sons : https://www.digminecraft.com/lists/sound_list_pc.php"
+        );
+      case "item":
+        return await chatClient.say(
+          channel,
+          "ajoute un item minecraft  , liste des items : https://minecraftitemids.com/"
+        );
     }
   }
 };

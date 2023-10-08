@@ -8,6 +8,7 @@ export type HeroSkin =
   | "kikiks"
   | "tarte_y_flette"
   | "andrew"
+  | "jim"
   | "icecoptered";
 export interface Player {
   id: string;
