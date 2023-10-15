@@ -14,10 +14,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(root, "index.html"),
-        overlay: resolve(root, "overlay-game", "index.html"),
         mediaPlayer: resolve(root, "media-player", "index.html"),
         roue: resolve(root, "roue", "index.html"),
-        webgl: resolve(root, "webgl", "index.html"),
       },
     },
   },

@@ -42,17 +42,17 @@ async function refresh(clientId: string, clientSecret: string, userId: string) {
     onRefresh: (userId, token) => saveToken(token, userId),
   });
 }
-
-export async function TwurpleInit(
-  clientId: string,
-  clientSecret: string,
-  userId: string
-): Promise<{
+export type TwurpleInitProps = {
   eventSub: EventSubWsListener;
   chatClient: ChatClient;
   apiClient: ApiClient;
   pubSubClient: PubSubClient;
-}> {
+};
+export async function TwurpleInit(
+  clientId: string,
+  clientSecret: string,
+  userId: string
+): Promise<TwurpleInitProps> {
   let token: AccessToken;
   try {
     token = await getToken(userId);

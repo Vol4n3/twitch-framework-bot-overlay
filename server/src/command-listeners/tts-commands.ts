@@ -63,12 +63,12 @@ const defaultVoice = "Microsoft Julie";
 const choices: { [key: string]: string } = {};
 export const TtsCommands: CommandListener = async ({
   channel,
-  chatClient,
+  chatBotClient: chatClient,
   command,
   user,
   args,
 }) => {
-  if (command === "voice") {
+  /*if (command === "voice") {
     const first = args[0];
     if (!first) {
       await chatClient.say(
@@ -94,5 +94,5 @@ export const TtsCommands: CommandListener = async ({
       preferredVoice ? preferredVoice : defaultVoice,
       0
     );
-  }
+  }*/
 };

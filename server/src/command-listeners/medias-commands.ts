@@ -73,12 +73,12 @@ export async function initMedias() {
   await scan("sounds").catch((e) => console.log(e));
   await scan("videos").catch((e) => console.log(e));
 }
-
+const channelMusic = "music";
 export const MediaCommands: CommandListener = async ({
   command,
   args,
   socket,
-  chatClient,
+  chatBotClient: chatClient,
   channel,
   obs,
   apiClient,
@@ -87,7 +87,7 @@ export const MediaCommands: CommandListener = async ({
   user,
   userId,
 }) => {
-  const emitVideo = (filename: string, times: number) => {
+  const playVideo = (filename: string, times: number) => {
     times = isNaN(times) ? 1 : times;
     times = times > 3 ? 3 : times;
     socket.emit("playVideo", {
@@ -117,15 +117,15 @@ export const MediaCommands: CommandListener = async ({
       const clips = await apiClient.clips.getClipsForBroadcaster(getId);
       const rand = pickRandomOne(clips.data);
       const volume = await obs.call("GetInputVolume", {
-        inputName: "music",
+        inputName: channelMusic,
       });
       await obs.call("SetInputVolume", {
-        inputName: "music",
+        inputName: channelMusic,
         inputVolumeMul: 0,
       });
       setTimeout(async () => {
         await obs.call("SetInputVolume", {
-          inputName: "music",
+          inputName: channelMusic,
           inputVolumeMul: volume.inputVolumeMul,
         });
       }, rand.duration * 1000);
@@ -142,7 +142,7 @@ export const MediaCommands: CommandListener = async ({
     const random = pickRandomOne(groupedMedias);
     const randomMedia = pickRandomOne(random.choices);
     if (randomMedia.type === "videos") {
-      await emitVideo(randomMedia.fileName, 1);
+      await playVideo(randomMedia.fileName, 1);
     } else {
       socket.emit("playSound", {
         fileName: randomMedia.fileName,
@@ -155,11 +155,11 @@ export const MediaCommands: CommandListener = async ({
   if (command === "medias") {
     await chatClient.say(
       channel,
-      `liste des videos: ${groupedMedias.map((m) => "!" + m.id).join(" ")}`
+      `liste des medias: ${groupedMedias.map((m) => "!" + m.id).join(" ")}`
     );
     return;
   }
-  if (command === "chain") {
+  /*  if (command === "chain") {
     const choices: GroupedMedia[] = args
       .slice(0, 5)
       .map((arg) => groupedMedias.find((s) => s.id === arg))
@@ -170,7 +170,7 @@ export const MediaCommands: CommandListener = async ({
     );
 
     return;
-  }
+  }*/
 
   let times = parseInt(args[0]);
   const findRand = groupedMedias.find(({ id }) => id === command);
@@ -179,7 +179,7 @@ export const MediaCommands: CommandListener = async ({
     if (randMedia.type === "sounds") {
       playSound(randMedia.fileName, times);
     } else {
-      emitVideo(randMedia.fileName, times);
+      playVideo(randMedia.fileName, times);
     }
   }
 };
