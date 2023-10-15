@@ -22,6 +22,9 @@ const saveConnectedUsers = async (users: string[]) => {
     "utf-8"
   );
 };
+saveConnectedUsers([]).then(() => {
+  console.log("clear connected users");
+});
 const getConnectedUsers = async (): Promise<string[]> => {
   try {
     return JSON.parse(
@@ -150,12 +153,10 @@ export const MediaCommands: CommandListener = async ({
   }
 
   if (command === "medias") {
-    await apiBotClient.whispers.sendWhisper(
-      TWITCH_BOT_ID,
-      userId,
+    await chatClient.say(
+      channel,
       `liste des videos: ${groupedMedias.map((m) => "!" + m.id).join(" ")}`
     );
-    await chatClient.say(channel, `@${user} , je t'envoie la liste en mp.`);
     return;
   }
   if (command === "chain") {
