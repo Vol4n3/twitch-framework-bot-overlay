@@ -84,6 +84,13 @@ export async function appInit([
 
   pubSubClient.onRedemption(TWITCH_BROADCASTER_ID, async (message) => {
     const userLower = message.userName.toLowerCase();
+    /*
+     * Plutot que de boucler sur les fonctions et faire la vérif
+     * Passer par un mapping de l'ID de la reward et la fonction
+     *  {
+     *    "REWARD_ID" : COMMANDFUNCTION
+     *  }
+     */
     for (let i = 0; i < rewardListeners.length; i++) {
       const cancelNext = await rewardListeners[i]({
         channel: TWITCH_CHANNEL,

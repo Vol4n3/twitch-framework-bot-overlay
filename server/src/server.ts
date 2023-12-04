@@ -5,6 +5,7 @@ import { setSpotifyCode } from "./spotify/spotify-init";
 
 export const httpServer = createServer((req, res) => {
   const url = new URL(`${SERVER_ADDRESS}${req.url || "/"}`);
+  console.log(req.url)
   const searchCode = url.searchParams.get("code");
   if (req.url && req.url.startsWith("/twurple")) {
     if (searchCode) setTwitchCode(searchCode);

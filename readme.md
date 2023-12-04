@@ -1,3 +1,11 @@
+TODOLIST
+
+#1 utiliser point chaine
+#2 finir roue ( réparer aussi son timer30 sec)
+#3 quiveuxgagner des mouki
+#4 le chiffre en or
+#5 ALERTE EN TOUT GENRE
+
 # Twitch framework for chatbot and overlay
 
 Tested on windows only

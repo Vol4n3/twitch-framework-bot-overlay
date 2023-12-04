@@ -7,7 +7,7 @@ export const SpotifyCommands: CommandListener = async ({
   chatBotClient: chatClient,
   channel,
 }) => {
-  /*  if (command === "sr") {
+   /*if (command === "sr") {
     const response = await spotify.addQueue(args.join(" ")).catch(() => {
       chatClient.say(
         channel,
@@ -39,6 +39,6 @@ export const SpotifyCommands: CommandListener = async ({
         channel,
         `${response.item.name} ${response.item.external_urls.spotify}`
       );
-    }
+      }
   }*/
 };
