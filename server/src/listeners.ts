@@ -14,6 +14,9 @@ import OBSWebSocket from "obs-websocket-js";
 import { SpotifyInstance } from "./spotify/spotify-types";
 import { SpotifyCommands } from "./command-listeners/spotify-commands";
 import { HelpCommands } from "./command-listeners/help-commands";
+import { SpotifyRewardCommands } from "./reward-listeners/spotify-commands";
+import { CoucouRewardCommands } from "./reward-listeners/coucou-commands";
+import { SkipRewardCommands } from "./reward-listeners/skip-commands";
 
 export const commandListeners: CommandListener[] = [
   HelpCommands,
@@ -21,7 +24,11 @@ export const commandListeners: CommandListener[] = [
   MediaCommands,
   SpotifyCommands,
 ];
-export const rewardListeners: RewardListener[] = [];
+export const rewardListeners: RewardListener[] = [
+  SpotifyRewardCommands,
+  SkipRewardCommands, 
+  CoucouRewardCommands,
+];
 
 export type ServerSocket = Server<
   ClientToServerEvents,

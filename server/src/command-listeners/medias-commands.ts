@@ -116,19 +116,6 @@ export const MediaCommands: CommandListener = async ({
       if (!getId) return;
       const clips = await apiClient.clips.getClipsForBroadcaster(getId);
       const rand = pickRandomOne(clips.data);
-      const volume = await obs.call("GetInputVolume", {
-        inputName: channelMusic,
-      });
-      await obs.call("SetInputVolume", {
-        inputName: channelMusic,
-        inputVolumeMul: 0,
-      });
-      setTimeout(async () => {
-        await obs.call("SetInputVolume", {
-          inputName: channelMusic,
-          inputVolumeMul: volume.inputVolumeMul,
-        });
-      }, rand.duration * 1000);
       socket.emit("playClip", { id: rand.id, duration: rand.duration });
       const broadcaster = await rand.getBroadcaster();
       await chatClient.say(
@@ -159,7 +146,8 @@ export const MediaCommands: CommandListener = async ({
     );
     return;
   }
-  /*  if (command === "chain") {
+  
+  if (command === "chain") {
     const choices: GroupedMedia[] = args
       .slice(0, 5)
       .map((arg) => groupedMedias.find((s) => s.id === arg))
@@ -170,7 +158,7 @@ export const MediaCommands: CommandListener = async ({
     );
 
     return;
-  }*/
+  }
 
   let times = parseInt(args[0]);
   const findRand = groupedMedias.find(({ id }) => id === command);

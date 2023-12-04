@@ -28,6 +28,7 @@ async function getToken(userId: string): Promise<AccessToken> {
 }
 
 async function saveToken(token: AccessToken, userId: string) {
+  console.log(token)
   return await fs.writeFile(
     `./${STORAGE_FOLDER}/twurple_token_${userId}.json`,
     JSON.stringify(token, null, 4),
